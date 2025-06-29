@@ -354,31 +354,29 @@ def main():
                     
                     # Manual modification mode
                     if st.session_state.modification_mode:
-                        st.subheader("🔧 Manual modification")
-                        with st.form("manual_mapping"):
-                            part_of = st.text_input("Part of (belongs to entity)", value=suggestion.get('part_of', ''))
-                            maps_to_property = st.text_input("Maps to Property", value=suggestion.get('maps_to_property', ''))
-                            # Convert confidence_score to int to match slider parameter types
-                            confidence_value = suggestion.get('confidence_score', 50)
-                            try:
-                                confidence_value = int(round(float(confidence_value)))
-                            except (ValueError, TypeError):
-                                confidence_value = 50
-                            confidence = st.slider("Confidence index", 1, 100, value=confidence_value, step=1)
-                            justification = st.text_area("Justification", value=suggestion.get('justification', ''))
+                        st.write("---")
+                        with st.container(border=True):
+                            st.subheader("✏️ Manual Modification & Re-evaluation")
+                            st.info("If you've found a better ontology term, paste its full URI below for AI re-evaluation.")
                             
-                            if st.form_submit_button("💾 Save modifications"):
-                                st.session_state.mappings[col_name] = {
-                                    'part_of': part_of,
-                                    'maps_to_property': maps_to_property,
-                                    'confidence_score': confidence,
-                                    'justification': justification,
-                                    'status': 'accepted',
-                                    'timestamp': datetime.now().isoformat()
-                                }
-                                st.session_state.modification_mode = False
-                                st.success("✅ Mapping updated")
-                                st.rerun()
+                            user_uri = st.text_input("Paste new vocabulary URI:", key="user_provided_uri")
+                            
+                            if st.button("🤖 Re-evaluate this URI", use_container_width=True, type="primary"):
+                                if user_uri and user_uri.startswith("http"):
+                                    engine = get_mapping_engine()
+                                    if engine:
+                                        with st.spinner("AI is re-evaluating your suggestion..."):
+                                            profile = profile_column(col_name, df[col_name])
+                                            new_suggestion = engine.reevaluate_mapping(
+                                                profile=profile, 
+                                                user_provided_uri=user_uri,
+                                                model_entities=st.session_state.model_entities
+                                            )
+                                            st.session_state.current_suggestion = new_suggestion
+                                            st.session_state.modification_mode = False
+                                            st.rerun()
+                                else:
+                                    st.error("Please enter a valid URI starting with http.")
     
     # Step 4: Mapping Overview
     if st.session_state.mappings:
