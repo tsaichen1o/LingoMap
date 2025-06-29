@@ -1,0 +1,11 @@
+.DS_Store
+.vscode
+.idea
+.pytest_cache
+.venv
+.env*
+mapping_validation_report_*.json
+__pycache__/
+/lingomap_env/
+/lingomap_db/
+*/lingomap_db/
