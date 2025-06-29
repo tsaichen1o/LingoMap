@@ -6,11 +6,20 @@ LingoMap Vocabulary Processor (v3.1 - Local DB Only with Deduplication)
 Reads vocabulary from local Turtle files and stores them in a local ChromaDB instance.
 This version is designed to bypass cloud quota limitations for development and handles duplicate IDs gracefully.
 """
+import sys
+import os
+
+# Fix SQLite version issue for Streamlit Cloud deployment
+try:
+    import pysqlite3
+    sys.modules['sqlite3'] = pysqlite3
+except ImportError:
+    pass
+
 import chromadb
 from rdflib import Graph, RDFS, SKOS, URIRef, Namespace
 from sentence_transformers import SentenceTransformer
 from typing import List, Dict
-import os
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -6,11 +6,20 @@ LingoMap Vocabulary Processor (v2 - Cloud Ready)
 Reads vocabulary from Turtle files, generates embeddings, and stores them in ChromaDB.
 Prioritizes ChromaDB Cloud connection and falls back to local persistence if not configured.
 """
+import sys
+import os
+
+# Fix SQLite version issue for Streamlit Cloud deployment
+try:
+    import pysqlite3
+    sys.modules['sqlite3'] = pysqlite3
+except ImportError:
+    pass
+
 import chromadb
 from rdflib import Graph, RDFS, SKOS, URIRef, Namespace
 from sentence_transformers import SentenceTransformer
 from typing import List, Dict
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
