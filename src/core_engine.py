@@ -16,6 +16,7 @@ from data_profiler import profile_column
 from vocabulary_processor import VocabularyProcessor
 from column_clusterer import cluster_columns
 from entity_conception import process_clusters_to_entities
+from relationship_definition import define_relationships_with_llm
 
 load_dotenv()
 
@@ -69,6 +70,26 @@ class CoreMappingEngine:
         st.write("Entity conception complete.")
         
         return entities
+    
+    def generate_entity_relationships(self, entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Orchestrates the process of defining relationships between conceptual entities.
+        
+        Args:
+            entities: The list of entity dictionaries generated in Stage 1.
+        
+        Returns:
+            A list of relationship dictionaries inferred by the LLM.
+        """
+        st.write("\nStep 3: Defining relationships between entities via LLM...")
+        if not entities:
+            st.warning("Cannot define relationships because no entities were provided.")
+            return []
+        
+        relationships = define_relationships_with_llm(entities)
+        st.write("Relationship definition complete.")
+        
+        return relationships
 
     def _build_rag_query(self, profile: Dict[str, Any]) -> str:
         """Builds a richer query string for the RAG retriever."""

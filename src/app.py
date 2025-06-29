@@ -183,14 +183,13 @@ if 'model_entities' not in st.session_state:
 def init_session_state():
     defaults = {
         'df': None,
-        'api_key': None,
-        'engine_instance': None,
-        'generated_entities': None,
-        'current_column': None,
-        'current_suggestion': None,
-        'modification_mode': False,
         'mappings': {},
-        'rejected_columns': set()
+        'current_column': None,
+        'generated_entities': [],
+        'generated_relationships': [],
+        'modification_mode': False,
+        'rejected_columns': set(),
+        'last_analyzed_column': None
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -292,29 +291,76 @@ def main():
             # --- MODIFIED SECTION END ---
             
         st.divider()
+        st.header("Stage 2: Relationship Definition")
+        st.write("Based on the entities defined above, use an LLM to infer the logical connections between them.")
+        
+        if st.button("🚀 Define Entity Relationships", use_container_width=True, type="primary"):
+            engine = get_mapping_engine()
+            entities = st.session_state.generated_entities
+
+            if engine is not None:
+                with st.spinner("Analyzing entity connections with Gemini..."):
+                    relationships = engine.generate_entity_relationships(entities)
+                    st.session_state.generated_relationships = relationships
+                st.success("Relationship definition complete! ✅")
+            else:
+                st.error("Core engine initialization failed. Please check your API key or environment settings.")
 
     # --- STAGE 2: DETAILED COLUMN MAPPING ---
     # (The rest of your UI for detailed mapping would go here)
-    st.header("Stage 2: Detailed Column Mapping")
-    if not st.session_state.generated_entities:
-        st.info("Please run Stage 1 'Generate Core Entities' first.")
-    else:
-        # Your previous logic for selecting columns from clusters and suggesting mappings
-        # can be adapted here.
-        st.write("Select a column from the groups below to get a detailed mapping suggestion.")
+    # st.header("Stage 2: Detailed Column Mapping")
+    # if not st.session_state.generated_entities:
+    #     st.info("Please run Stage 1 'Generate Core Entities' first.")
+    # else:
+    #     # Your previous logic for selecting columns from clusters and suggesting mappings
+    #     # can be adapted here.
+    #     st.write("Select a column from the groups below to get a detailed mapping suggestion.")
         
-        clusters = cluster_columns(df)
-        for i, cluster_info in enumerate(clusters):
-            cluster_name = cluster_info.get('name', f"Group {i+1}")
-            columns = cluster_info.get('columns', [])
+    #     clusters = cluster_columns(df)
+    #     for i, cluster_info in enumerate(clusters):
+    #         cluster_name = cluster_info.get('name', f"Group {i+1}")
+    #         columns = cluster_info.get('columns', [])
             
-            with st.expander(f"**{cluster_name}** ({len(columns)} columns)"):
-                for col in columns:
-                    if st.button(col, key=f"btn_{col}"):
-                        st.session_state.current_column = col
-                        # This would trigger the detailed mapping logic from your original file
-                        st.info(f"Selected '{col}' for detailed mapping. (Logic to be implemented)")
-                        st.rerun()
+    #         with st.expander(f"**{cluster_name}** ({len(columns)} columns)"):
+    #             for col in columns:
+    #                 if st.button(col, key=f"btn_{col}"):
+    #                     st.session_state.current_column = col
+    #                     # This would trigger the detailed mapping logic from your original file
+    #                     st.info(f"Selected '{col}' for detailed mapping. (Logic to be implemented)")
+    #                     st.rerun()
+    
+    if st.session_state.generated_relationships:
+        st.subheader("🔗 AI-Generated Relationship Links")
+        relationships = st.session_state.generated_relationships
+        
+        if not relationships:
+            st.warning("No relationships were defined by the model.")
+        else:
+            for rel in relationships:
+                with st.container(border=True):
+                    # 格式化顯示: Source -> Property -> Target
+                    source = rel.get('sourceEntity', 'N/A')
+                    target = rel.get('targetEntity', 'N/A')
+                    prop = rel.get('usingProperty', 'N/A').split(':')[-1] # 只顯示屬性名稱
+
+                    st.markdown(f"##### {rel.get('associationId', 'N/A')}")
+                    st.code(f"{source}  ->  ({prop})  ->  {target}", language="text")
+                    
+                    with st.expander("View Details and Justification"):
+                        st.markdown(f"**Source Entity:** `{source}`")
+                        st.markdown(f"**Target Entity:** `{target}`")
+                        st.markdown(f"**Connecting Property:** `{rel.get('usingProperty', 'N/A')}`")
+                        st.markdown(f"**Justification:** *{rel.get('justification', 'No justification provided.')}*")
+                st.write("") # Add vertical space
+        st.divider()
+
+    # --- STAGE 3: DETAILED COLUMN MAPPING (Placeholder) ---
+    st.header("Stage 3: Detailed Column Mapping")
+    if not st.session_state.generated_relationships:
+        st.info("Please run Stage 1 and 2 first to define entities and their relationships.")
+    else:
+        st.write("Functionality for detailed column-by-column mapping will be implemented here.")
+
 
     # (Further stages for mapping overview and TTL generation would follow)
 # def main():
