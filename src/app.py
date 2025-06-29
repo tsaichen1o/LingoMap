@@ -237,6 +237,13 @@ def main():
         # Step 3: Field Analysis and Mapping
         if st.session_state.current_column:
             col_name = st.session_state.current_column
+            
+            # Reset suggestion when column changes
+            if 'last_analyzed_column' not in st.session_state or st.session_state.last_analyzed_column != col_name:
+                st.session_state.current_suggestion = None
+                st.session_state.modification_mode = False
+                st.session_state.last_analyzed_column = col_name
+            
             st.header(f"🔍 Step 3: Analyze Field `{col_name}`")
             
             # Display field basic information
@@ -278,6 +285,7 @@ def main():
                             temperature=temperature
                         )
                         st.session_state.current_suggestion = suggestion
+                        st.session_state.last_analyzed_column = col_name
                 else:
                     st.session_state.current_suggestion = {
                         "error": "Core engine initialization failed, please check API key settings."
@@ -350,6 +358,7 @@ def main():
                         with st.form("manual_mapping"):
                             part_of = st.text_input("Part of (belongs to entity)", value=suggestion.get('part_of', ''))
                             maps_to_property = st.text_input("Maps to Property", value=suggestion.get('maps_to_property', ''))
+                            # Convert confidence_score to int to match slider parameter types
                             confidence_value = suggestion.get('confidence_score', 50)
                             try:
                                 confidence_value = int(round(float(confidence_value)))
