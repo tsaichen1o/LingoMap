@@ -9,3 +9,5 @@ __pycache__/
 /lingomap_env/
 /lingomap_db/
 */lingomap_db/
+# Ignore all report files
+*_report.json
