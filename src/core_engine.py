@@ -6,7 +6,8 @@ LingoMap Core Mapping Engine (v2.1)
 import os
 import json
 import pandas as pd
-import google.generativeai as genai
+from google.generativeai.client import configure
+from google.generativeai.generative_models import GenerativeModel
 from typing import Dict, Any, List
 from dotenv import load_dotenv
 
@@ -33,10 +34,10 @@ class CoreMappingEngine:
             raise ValueError("❌ GOOGLE_API_KEY not found in environment variables.")
         
         print("   - Configuring Gemini API...")
-        genai.configure(api_key=api_key)
+        configure(api_key=api_key)
         
-        self.llm = genai.GenerativeModel('gemini-1.5-pro-latest')
-        print("✅ Core Mapping Engine initialized successfully.")
+        self.llm = GenerativeModel('gemini-2.0-flash-exp')
+        print("✅ Core Mapping Engine initialized successfully with Gemini 2.0 Flash.")
 
     def _build_rag_query(self, profile: Dict[str, Any]) -> str:
         """Builds a richer query string for the RAG retriever."""
@@ -90,7 +91,11 @@ Next, analyze the following information about the CSV column.
 - Column Name: `{profile.get('column_name')}`
 - Semantic Cluster: This column belongs to the '{cluster_name}' group.
 - Data Profile: {profile.get('inferred_semantic_type')} with sample values like [{profile.get('sample_values', ['N/A'])[0]}].
-- Relevant Concepts from Knowledge Base:
+- This JSON object contains detailed statistics about the column's data.
+```json
+{profile_str}
+```
+- Relevant Concepts from Knowledge Base (RAG):
 {rag_str if rag_str else "  (None found)"}
 
 # STEP 3: DECIDE AND JUSTIFY
@@ -139,8 +144,11 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
 
         print(f"   - Step 4: Calling Gemini API (Temperature: {temperature})...")
         try:
-            generation_config = {"temperature": temperature, "response_mime_type": "application/json"}
-            response = self.llm.generate_content(final_prompt, generation_config=generation_config)
+            generation_config: Dict[str, Any] = {
+                "temperature": temperature,
+                "response_mime_type": "application/json"
+            }
+            response = self.llm.generate_content(final_prompt, generation_config=generation_config)  # type: ignore
             suggestion = json.loads(response.text)
             print("   - Suggestion received.")
             return suggestion
@@ -198,8 +206,11 @@ Provide only the JSON object.
         print("   - Step 2: Calling Gemini API for re-evaluation...")
         try:
             # Re-evaluation can be more creative
-            generation_config = {"temperature": 0.5, "response_mime_type": "application/json"}
-            response = self.llm.generate_content(final_prompt, generation_config=generation_config)
+            generation_config: Dict[str, Any] = {
+                "temperature": 0.5,
+                "response_mime_type": "application/json"
+            }
+            response = self.llm.generate_content(final_prompt, generation_config=generation_config)  # type: ignore
             suggestion = json.loads(response.text)
             print("   - Re-evaluation received.")
             return suggestion
