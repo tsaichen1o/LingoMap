@@ -10,10 +10,12 @@ from google.generativeai.client import configure
 from google.generativeai.generative_models import GenerativeModel
 from typing import Dict, Any, List
 from dotenv import load_dotenv
+import streamlit as st
 
 from data_profiler import profile_column
 from vocabulary_processor import VocabularyProcessor
 from column_clusterer import cluster_columns
+from entity_conception import process_clusters_to_entities
 
 load_dotenv()
 
@@ -38,6 +40,35 @@ class CoreMappingEngine:
         
         self.llm = GenerativeModel('gemini-2.0-flash-exp')
         print("✅ Core Mapping Engine initialized successfully with Gemini 2.0 Flash.")
+        
+    def generate_semantic_entities(self, df: pd.DataFrame, n_clusters: int) -> List[Dict[str, Any]]:
+        """
+        Orchestrates the full process from raw data to conceptual entities.
+        
+        Step 1: Cluster columns based on their content.
+        Step 2: Run entity conception for each cluster using an LLM.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame.
+            clustering_params (dict): Parameters for the clustering algorithm.
+
+        Returns:
+            List[Dict[str, Any]]: A list of AI-generated entity definitions.
+        """
+        st.write("Step 1: Clustering columns based on data similarity...")
+        # Ensure your cluster_columns function returns a dictionary like:
+        # {'Bank Address': ['ADDRESS', 'CITY', ...], 'Institution Info': ['NAME', ...]}
+        # If it returns a list of dicts, we adapt to it.
+        clusters = cluster_columns(df=df, n_clusters=n_clusters) 
+        st.write(f"Clustering complete. Found {len(clusters)} potential entity groups.")
+        
+        st.write("\nStep 2: Conceptualizing entities from clusters via LLM...")
+        # Call the new function to process these clusters
+        # Convert clusters_dict back to a list of dicts as expected by process_clusters_to_entities
+        entities = process_clusters_to_entities(df, clusters)
+        st.write("Entity conception complete.")
+        
+        return entities
 
     def _build_rag_query(self, profile: Dict[str, Any]) -> str:
         """Builds a richer query string for the RAG retriever."""
@@ -232,7 +263,7 @@ def main():
         print(f"✅ Loaded {len(df)} rows and {len(df.columns)} columns.")
 
         print("\n🔄 Running semantic clustering to get group context...")
-        named_clusters = cluster_columns()
+        named_clusters = cluster_columns(df=df, n_clusters=8)
         
         column_to_cluster_name = {
             col: cluster['name'] 

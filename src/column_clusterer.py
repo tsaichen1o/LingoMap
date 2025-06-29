@@ -1,163 +1,146 @@
-"""
-LingoMap column clusterer (v4 - Final fusion version)
-- Core idea: Use manual descriptions combined with data samples to enhance semantic richness.
-- Stability: Use a fixed number of clusters k, specified by experts, to ensure predictable and accurate results.
-"""
+# column_clusterer.py
 
-from sentence_transformers import SentenceTransformer
-from sklearn.cluster import KMeans
+import json
+import logging
 import pandas as pd
-import numpy as np
+from google.generativeai.generative_models import GenerativeModel
+import streamlit as st
 from typing import List, Dict, Any
-import os
-import sys
-import re
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Prior knowledge: A dictionary of column names and their descriptions.
+# This provides the semantic context the LLM will use for clustering.
+COLUMN_DESCRIPTIONS = {
+    "ACQDATE": "Acquisition Date of the branch",
+    "ADDRESS": "Primary street address of the branch",
+    "ADDRESS2": "Secondary street address information (e.g., suite number)",
+    "BKCLASS": "Institution Class or Type (e.g., National Bank, State Member Bank)",
+    "CBSA": "Core Based Statistical Area Name",
+    "CBSA_DIV": "Metropolitan Division Name within a CBSA",
+    "CBSA_DIV_FLG": "Flag indicating if the branch is in a Metropolitan Division",
+    "CBSA_DIV_NO": "Metropolitan Division Number",
+    "CBSA_METRO": "Metropolitan Statistical Area Name",
+    "CBSA_METRO_FLG": "Flag indicating if the branch is in a Metropolitan Area",
+    "CBSA_METRO_NAME": "Metropolitan Statistical Area Name",
+    "CBSA_MICRO_FLG": "Flag indicating if the branch is in a Micropolitan Area",
+    "CBSA_NO": "Core Based Statistical Area Number",
+    "CERT": "The unique FDIC Certificate number for the parent institution",
+    "CITY": "Branch's city name",
+    "COUNTY": "Branch's county name",
+    "CSA": "Combined Statistical Area Name",
+    "CSA_FLG": "Flag indicating if the branch is in a Combined Statistical Area",
+    "CSA_NO": "Combined Statistical Area Number",
+    "ESTYMD": "Date the branch was established",
+    "FI_UNINUM": "FDIC unique number for the parent financial institution",
+    "ID": "Generic record identifier",
+    "LATITUDE": "Latitude coordinate of the branch",
+    "LONGITUDE": "Longitude coordinate of the branch",
+    "MAINOFF": "Flag indicating if this is the main office",
+    "MDI_STATUS_CODE": "Minority Depository Institution Status Code",
+    "MDI_STATUS_DESC": "Description of the Minority Depository Institution Status",
+    "NAME": "Official name of the parent financial institution",
+    "OFFNAME": "Official name of the branch office",
+    "OFFNUM": "Branch office number, assigned by the institution",
+    "RUNDATE": "The date the data report was generated",
+    "SERVTYPE": "Service Type Code (e.g., Full Service, Limited Service)",
+    "SERVTYPE_DESC": "Description of the branch's service type",
+    "STALP": "Branch's state abbreviation (e.g., CA, NY)",
+    "STCNTY": "FIPS code for the state and county",
+    "STNAME": "Branch's full state name",
+    "UNINUM": "FDIC unique identification number for a branch office",
+    "ZIP": "Branch's postal ZIP code",
+    "X": "X Coordinate, often redundant with Longitude",
+    "Y": "Y Coordinate, often redundant with Latitude",
+    "OBJECTID": "Internal unique ID for a row or feature"
+}
 
 
-# Ensure that modules in the src folder can be imported
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-def create_hybrid_semantic_document(column_name: str, column_descriptions: dict, df: pd.DataFrame) -> str:
+def cluster_columns_with_llm(all_columns: List[str], n_clusters: int) -> List[Dict[str, Any]]:
     """
-    Create a hybrid semantic document that combines manual descriptions and data samples for a column.
+    Uses a Large Language Model to cluster columns based on their names and descriptions.
+
+    Args:
+        all_columns (List[str]): The list of column names from the DataFrame.
+        n_clusters (int): The desired number of clusters.
+
+    Returns:
+        A list of dictionaries, where each dictionary represents a named cluster
+        and contains the list of columns belonging to it.
     """
-    # 1. Get the core manual description
-    manual_description = column_descriptions.get(column_name, "No specific description.")
+    logging.info(f"Starting LLM-based clustering for {len(all_columns)} columns into {n_clusters} clusters.")
 
-    # 2. Get data samples as content evidence
-    if df[column_name].isnull().all():
-        samples_str = "all values are empty"
-    else:
-        # Randomly sample up to 10 non-empty samples
-        samples = df[column_name].dropna().sample(n=min(10, len(df[column_name].dropna()))).tolist()
-        samples_str = ", ".join(map(str, samples))
+    model = GenerativeModel('gemini-2.0-flash-exp')
 
-    # 3. Combine the final, rich semantic document
-    document = (
-        f"Column Name: '{column_name}'. "
-        f"Expert Description: '{manual_description}'. "
-        f"Data Samples: [{samples_str}]."
+    # Filter descriptions to only include columns present in the uploaded data
+    available_descriptions = {col: desc for col, desc in COLUMN_DESCRIPTIONS.items() if col in all_columns}
+    
+    # Format the list of columns and their descriptions for the prompt
+    formatted_column_list = "\n".join(
+        f'- `{col}`: {desc}' for col, desc in available_descriptions.items()
     )
-    return document
 
-def generate_intuitive_cluster_name(columns: List[str], descriptions: dict) -> str:
-    """
-    Generate a more intuitive cluster name based on the columns and their manual descriptions within the group.
-    """
-    words = []
-    for col in columns:
-        desc = descriptions.get(col, '')
-        match = re.search(r'\((.*?)\)', desc)
-        if match:
-            words.extend(match.group(1).lower().split())
+    # Design the prompt for the LLM
+    prompt = f"""
+# ROLE
+You are an expert data architect and ontologist specializing in financial and geographic data.
 
-    if not words:
-        # If there is no English description, use the column name itself to determine
-        lower_columns = [c.lower() for c in columns]
-        if any(w in ' '.join(lower_columns) for w in ['address', 'city', 'state', 'zip']):
-            return "Branch Physical Address"
-        return f"{columns[0]} & related"
+# TASK
+Your task is to group the following list of data columns into {n_clusters} semantically coherent clusters.
+Analyze the column names and their descriptions to understand their meaning and relationship.
+For example, columns related to addresses (`ADDRESS`, `CITY`, `STALP`, `ZIP`) should be in one group.
+Columns related to the parent company (`NAME`, `CERT`) should be in another.
 
-    word_counts = pd.Series(words).value_counts()
-    top_word = word_counts.index[0]
+# INPUT: COLUMN LIST & DESCRIPTIONS
+{formatted_column_list}
 
-    # Based on expert knowledge naming rules
-    if top_word in ['address', 'city', 'state', 'zip', 'county']:
-        return "Branch Physical Address"
-    if top_word in ['statistical', 'area']:
-        return "Statistical Areas"
-    if top_word in ['date']:
-        return "Key Dates"
-    if top_word in ['number', 'certificate', 'code', 'id', 'uninum', 'fdic']:
-        return "Identifiers & Codes"
-    if top_word in ['name', 'class', 'status', 'office', 'institution', 'type']:
-         return "Institution & Branch Descriptors"
-    if top_word in ['coordinate', 'latitude', 'longitude']:
-         return "Geographic Coordinates"
-    
-    return f"{top_word.title()} Related Fields"
+# INSTRUCTIONS
+1.  Create exactly {n_clusters} clusters.
+2.  Assign each column from the input list to one of the clusters.
+3.  Give each cluster a short, descriptive name (e.g., "Institution Identity", "Branch Location", "Geospatial Coordinates").
+4.  Return the result as a single, valid JSON object. The format must be a list of dictionaries,
+    where each dictionary has two keys: "name" (the cluster name) and "columns" (a list of column names).
+5.  Do not include any columns that were not in the input list.
 
+# OUTPUT FORMAT (EXAMPLE)
+[
+  {{
+    "name": "Institution Identity",
+    "columns": ["CERT", "NAME", "BKCLASS"]
+  }},
+  {{
+    "name": "Branch Location",
+    "columns": ["ADDRESS", "CITY", "STALP", "ZIP", "COUNTY"]
+  }}
+]
+"""
 
-def cluster_columns(df: pd.DataFrame = None, csv_file_path: str = None) -> List[Dict[str, Any]]:
-    """Cluster the columns of a DataFrame."""
-    if df is None:
-        if csv_file_path and os.path.exists(csv_file_path):
-            df = pd.read_csv(csv_file_path, low_memory=False)
-        else:
-            raise FileNotFoundError("Must provide a DataFrame or a valid CSV file path.")
-
-    # --- [Core] The most valuable manual description data you provided ---
-    column_descriptions = {
-        "ACQDATE": "Acquisition Date", "ADDRESS": "Branch Address",
-        "ADDRESS2": "Street Address Line 2", "BKCLASS": "Institution Class",
-        "CBSA": "Core Based Statistical Area Name", "CBSA_DIV": "Metropolitan Divisions Name",
-        "CBSA_DIV_FLG": "Metropolitan Divisions Flag", "CBSA_DIV_NO": "Metropolitan Divisions Number",
-        "CBSA_METRO": "Metropolitan Division Number", "CBSA_METRO_FLG": "Metropolitan Division Flag",
-        "CBSA_METRO_NAME": "Metropolitan Division Name", "CBSA_MICRO_FLG": "Micropolitan Division Flag",
-        "CBSA_NO": "Core Based Statistical Areas", "CERT": "Institution FDIC Certificate #",
-        "CITY": "Branch City", "COUNTY": "Branch County", "CSA": "Combined Statistical Area Name",
-        "CSA_FLG": "Combined Statistical Area Flag", "CSA_NO": "Combined Statistical Area Number",
-        "ESTYMD": "Branch Established Date", "FI_UNINUM": "FDIC UNINUM of the Owner Institution",
-        "ID": "ID", "LATITUDE": "Latitude", "LONGITUDE": "Longitude", "MAINOFF": "Main Office",
-        "MDI_STATUS_CODE": "Minority Status Code", "MDI_STATUS_DESC": "Minority Status Description",
-        "NAME": "Institution Name", "OFFNAME": "Office Name", "OFFNUM": "Branch Number",
-        "RUNDATE": "Run Date", "SERVTYPE": "Service Type Code",
-        "SERVTYPE_DESC": "Service Type Description", "STALP": "Branch State Abbreviation",
-        "STCNTY": "State and County Number", "STNAME": "Branch State",
-        "UNINUM": "Unique Identification Number for a Branch Office", "ZIP": "Branch Zip Code",
-        "X": "X Coordinate, likely Longitude", "Y": "Y Coordinate, likely Latitude"
-    }
-    
-    # Ensure that all columns in the DataFrame are in the description dictionary
-    for col in df.columns:
-        if col not in column_descriptions:
-            column_descriptions[col] = f"No description available for {col}"
-
-    column_names = df.columns.tolist()
-    
-    print("📝 Creating hybrid semantic documents for each column...")
-    semantic_documents = [create_hybrid_semantic_document(col, column_descriptions, df) for col in column_names]
-    
-    print("🔄 Loading embedding model and performing vectorization...")
-    model = SentenceTransformer('all-mpnet-base-v2')
-    embeddings = model.encode(semantic_documents)
-    
-    # --- Use a fixed k value based on expert knowledge to ensure accuracy and stability ---
-    n_clusters = 8
-    print(f"🎯 Using expert-specified k={n_clusters} for K-means clustering...")
-    # ------------------------------------------------------------------
-
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init='auto')
-    cluster_labels = kmeans.fit_predict(embeddings)
-    
-    clusters_by_id = {i: [] for i in range(n_clusters)}
-    for i, label in enumerate(cluster_labels):
-        clusters_by_id[label].append(column_names[i])
-    
-    print("🏷️ Generating names for clusters...")
-    final_clusters = []
-    for cluster_id, columns in clusters_by_id.items():
-        if not columns: continue
-        cluster_name = generate_intuitive_cluster_name(columns, column_descriptions)
-        final_clusters.append({'name': cluster_name, 'columns': sorted(columns)})
-
-    print(f"✅ Clustering completed! {len(final_clusters)} clusters")
-    return sorted(final_clusters, key=lambda x: x['name'])
-
-
-if __name__ == "__main__":
-    print("🧪 Testing column clustering functionality (v4 Final)...")
     try:
-        test_csv_path = 'FDIC_Insured_Banks.csv'
-        clusters = cluster_columns(csv_file_path=test_csv_path)
+        logging.info("Sending clustering prompt to Gemini...")
+        response = model.generate_content(prompt)
         
-        print("\n📋 Clustering results:")
-        for i, cluster in enumerate(clusters):
-            print(f"\n--- Cluster {i+1}: {cluster['name']} ---")
-            print(f"   {', '.join(cluster['columns'])}")
+        # Clean and parse the JSON response
+        cleaned_json_str = response.text.strip().lstrip('```json').rstrip('```').strip()
+        clusters = json.loads(cleaned_json_str)
         
+        # Basic validation of the returned structure
+        if isinstance(clusters, list) and all(isinstance(c, dict) and 'name' in c and 'columns' in c for c in clusters):
+            logging.info("Successfully received and parsed valid clusters from LLM.")
+            return clusters
+        else:
+            logging.error("LLM returned a malformed JSON structure for clusters.")
+            return []
+            
     except Exception as e:
-        import traceback
-        print(f"❌ Test failed: {e}")
-        traceback.print_exc()
+        logging.error(f"An error occurred during LLM clustering: {e}")
+        st.error(f"Failed to get clusters from the LLM. Error: {e}")
+        return []
 
+# This function now acts as a wrapper to call the new LLM-based method.
+# This ensures that the rest of your application (`core_engine.py`) doesn't need to change its call signature.
+def cluster_columns(df: pd.DataFrame, n_clusters: int = 8) -> List[Dict[str, Any]]:
+    """
+    Main entry point for column clustering. This now uses the LLM-based approach.
+    """
+    return cluster_columns_with_llm(all_columns=df.columns.tolist(), n_clusters=n_clusters)
