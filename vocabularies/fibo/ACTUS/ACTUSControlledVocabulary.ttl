@@ -1,0 +1,145 @@
+# baseURI: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/ACTUS/ACTUSControlledVocabulary/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FBC/DebtAndEquities/Debt/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FBC/FinancialInstruments/FinancialInstruments/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Securities/SecuritiesClassification/
+# imports: https://www.omg.org/spec/Commons/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/Classifiers/
+# imports: https://www.omg.org/spec/Commons/CodesAndCodeSets/
+# imports: https://www.omg.org/spec/Commons/Collections/
+# imports: https://www.omg.org/spec/Commons/Designators/
+# imports: https://www.omg.org/spec/Commons/TextDatatype/
+
+@base <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/ACTUS/ACTUSControlledVocabulary/> .
+@prefix cmns-av: <https://www.omg.org/spec/Commons/AnnotationVocabulary/> .
+@prefix cmns-cds: <https://www.omg.org/spec/Commons/CodesAndCodeSets/> .
+@prefix cmns-cls: <https://www.omg.org/spec/Commons/Classifiers/> .
+@prefix cmns-col: <https://www.omg.org/spec/Commons/Collections/> .
+@prefix cmns-dsg: <https://www.omg.org/spec/Commons/Designators/> .
+@prefix cmns-txt: <https://www.omg.org/spec/Commons/TextDatatype/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fibo-actus-acv: <https://spec.edmcouncil.org/fibo/ontology/ACTUS/ACTUSControlledVocabulary/> .
+@prefix fibo-fbc-dae-dbt: <https://spec.edmcouncil.org/fibo/ontology/FBC/DebtAndEquities/Debt/> .
+@prefix fibo-fbc-fi-fi: <https://spec.edmcouncil.org/fibo/ontology/FBC/FinancialInstruments/FinancialInstruments/> .
+@prefix fibo-fnd-utl-av: <https://spec.edmcouncil.org/fibo/ontology/FND/Utilities/AnnotationVocabulary/> .
+@prefix fibo-sec-sec-cls: <https://spec.edmcouncil.org/fibo/ontology/SEC/Securities/SecuritiesClassification/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://spec.edmcouncil.org/fibo/ontology/ACTUS/ACTUSControlledVocabulary/>
+	a owl:Ontology ;
+	rdfs:label "ACTUS Controlled Vocabulary" ;
+	dcterms:abstract "This ontology represents the ACTUS taxonomy as a controlled vocabulary and maps it to FIBO, providing the corresponding semantics and enabling integration of knowledge graphs based on FIBO with the ACTUS system." ;
+	dcterms:license """Copyright (c) 2024-2025 ACTUS Financial Research Foundation
+Copyright (c) 2024-2025 EDM Council, Inc.
+Copyright (c) 2024-2025 Object Management Group, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+		
+See https://opensource.org/licenses/MIT.""" ;
+	dcterms:source "https://www.actusfrf.org"^^xsd:anyURI ;
+	owl:imports
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FBC/DebtAndEquities/Debt/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FBC/FinancialInstruments/FinancialInstruments/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Securities/SecuritiesClassification/> ,
+		<https://www.omg.org/spec/Commons/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/Classifiers/> ,
+		<https://www.omg.org/spec/Commons/CodesAndCodeSets/> ,
+		<https://www.omg.org/spec/Commons/Collections/> ,
+		<https://www.omg.org/spec/Commons/Designators/> ,
+		<https://www.omg.org/spec/Commons/TextDatatype/>
+		;
+	owl:versionIRI <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/ACTUS/ACTUSControlledVocabulary/> ;
+	fibo-fnd-utl-av:hasMaturityLevel fibo-fnd-utl-av:Provisional ;
+	cmns-av:copyright
+		"Copyright (c) 2024-2025 ACTUS Financial Research Foundation" ,
+		"Copyright (c) 2024-2025 EDM Council, Inc." ,
+		"Copyright (c) 2024-2025 Object Management Group, Inc."
+		;
+	.
+
+fibo-actus-acv:ACTUSContractTypeClassifier
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-sec-sec-cls:FinancialInstrumentClassifier ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-dsg:isDefinedIn ;
+			owl:hasValue fibo-actus-acv:AlgorithmicContractTypesClassificationScheme ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-cls:classifies ;
+			owl:someValuesFrom [
+				a owl:Class ;
+				owl:unionOf (
+					fibo-fbc-fi-fi:FinancialInstrument
+					fibo-fbc-dae-dbt:CreditAgreement
+				) ;
+			] ;
+		]
+		;
+	rdfs:label "ACTUS contract type classifier" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/ACTUS/ACTUSControlledVocabulary/> ;
+	skos:definition "classifier for a financial instrument or related credit enhancement based on its type and characteristics" ;
+	cmns-av:explanatoryNote "Financial contracts are classified as basic or combined / derivatives, and then each of these areas breaks down into a number of subclassifications." ;
+	.
+
+fibo-actus-acv:ACTUSContractTypeClassifier-Annuity
+	a
+		owl:NamedIndividual ,
+		fibo-actus-acv:ACTUSContractTypeClassifier
+		;
+	rdfs:label "ACTUS contract type classifier - annuity" ;
+	dcterms:source "https://www.actusfrf.org/taxonomy" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/ACTUS/ACTUSControlledVocabulary/> ;
+	skos:definition "contract classifier that applies to contracts whose principal is paid fully at the initial exchange date and principal plus interest is repaid periodically in constant amounts until maturity" ;
+	skos:example "classic level payment mortgages, leasing contracts, etc." ;
+	skos:note "If the contract has a variable rate, the total amount of principal and interest is recalculated to be fully matured at the maturity date." ;
+	cmns-cls:classifies fibo-fbc-dae-dbt:CreditAgreementRepaidPeriodically ;
+	cmns-col:isMemberOf fibo-actus-acv:AlgorithmicContractTypesClassificationScheme ;
+	cmns-dsg:isDefinedIn fibo-actus-acv:AlgorithmicContractTypesClassificationScheme ;
+	cmns-txt:hasTextValue "ANN" ;
+	.
+
+fibo-actus-acv:ACTUSContractTypeClassifier-PrincipalAtMaturity
+	a
+		owl:NamedIndividual ,
+		fibo-actus-acv:ACTUSContractTypeClassifier
+		;
+	rdfs:label "ACTUS contract type classifier - principal at maturity" ;
+	dcterms:source "https://www.actusfrf.org/taxonomy" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/ACTUS/ACTUSControlledVocabulary/> ;
+	skos:definition "contract classifier that applies to contracts whose principal is paid fully at the initial exchange date and repaid at maturity" ;
+	skos:example "all kinds of bonds, term deposits, bullet loans, and so forth" ;
+	cmns-cls:classifies fibo-fbc-dae-dbt:CreditAgreementRepaidAtMaturity ;
+	cmns-col:isMemberOf fibo-actus-acv:AlgorithmicContractTypesClassificationScheme ;
+	cmns-dsg:isDefinedIn fibo-actus-acv:AlgorithmicContractTypesClassificationScheme ;
+	cmns-txt:hasTextValue "PAM" ;
+	.
+
+fibo-actus-acv:AlgorithmicContractTypesClassificationScheme
+	a
+		owl:NamedIndividual ,
+		fibo-sec-sec-cls:FinancialInstrumentClassificationScheme ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-dsg:defines ;
+			owl:someValuesFrom fibo-actus-acv:ACTUSContractTypeClassifier ;
+		]
+		;
+	rdfs:label "Algorithmic Contract Types classification scheme" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/ACTUS/ACTUSControlledVocabulary/> ;
+	skos:definition "classification scheme behind the ACTUS modeling paradigm, in which standardized Contract Types (CTs) are the granular building blocks of the financial world" ;
+	cmns-av:abbreviation "ACTUS classification scheme" ;
+	cmns-av:adaptedFrom "https://www.actusfrf.org/methodology"^^xsd:anyURI ;
+	.
+

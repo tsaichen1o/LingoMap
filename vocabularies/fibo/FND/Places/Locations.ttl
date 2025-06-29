@@ -1,0 +1,182 @@
+# baseURI: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Locations/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/RealProperty/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/Locations/
+
+@base <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Locations/> .
+@prefix cmns-av: <https://www.omg.org/spec/Commons/AnnotationVocabulary/> .
+@prefix cmns-loc: <https://www.omg.org/spec/Commons/Locations/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fibo-fnd-plc-loc: <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> .
+@prefix fibo-fnd-plc-rp: <https://spec.edmcouncil.org/fibo/ontology/FND/Places/RealProperty/> .
+@prefix fibo-fnd-utl-av: <https://spec.edmcouncil.org/fibo/ontology/FND/Utilities/AnnotationVocabulary/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/>
+	a owl:Ontology ;
+	rdfs:label "Commons Locations Ontology" ;
+	dcterms:abstract "This ontology provides a very high level definition of geographic region and geopolitical entity related concepts, including, but not limited to, countries, sub-country regions such as states and provinces, municipalities, etc., extending the Object Management Group (OMG)'s Languages, Countries, and Codes (LCC) ontologies as needed in FIBO. As such, these terms are automatically mapped to the LCC controlled vocabulary representing ISO 3166 country and country subdivision codes, and may be mapped to other de facto standards such as Geonames and the CIA World Factbook. The concept of a business center, defined herein, maps directly to the FpML concept with the same name, and to the set of business centers and broader municipalities included in ISO 10383, Codes for exchanges and market identification (MIC)." ;
+	dcterms:license """Copyright (c) 2013-2025 EDM Council, Inc.
+Copyright (c) 2013-2025 Object Management Group, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+		
+		See https://opensource.org/licenses/MIT.""" ;
+	owl:imports
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/RealProperty/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/Locations/>
+		;
+	owl:versionIRI <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Locations/> ;
+	skos:changeNote
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20130801/Places/Locations.rdf version of this ontology was modified per the issue resolutions identified in the FIBO FND 1.0 FTF report and in http://www.omg.org/spec/EDMC-FIBO/FND/1.0/AboutFND-1.0/." ,
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20141101/Places/Locations.rdf version of this ontology was modified for the FIBO 2.0 RFC to integrate it with LCC." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations.rdf version of the ontology was modified to replace additional content that is now available in the OMG Commons Ontology Library (Commons) v1.2 (FND-389). Note that this ontology will be removed from FIBO when the deprecated elements herein are eliminated (after a minimum of 6 months)." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations.rdf version of the ontology was modified to use the Commons Ontology Library (Commons) Annotation Vocabulary rather than the OMG's Specification Metadata vocabulary." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations.rdf version of this ontology was modified eliminate deprecated elements." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations.rdf version of this ontology was modified to address hygiene issues with respect to text formatting." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations.rdf version of this ontology was modified to move definitions related to parcel and real estate to a new real property ontology (LOAN-168)." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations.rdf version of this ontology was modified to revise definitions to improve them and make them ISO 704 compliant, and merge the concepts that were previously in the countries ontology into this one."
+		;
+	fibo-fnd-utl-av:hasMaturityLevel fibo-fnd-utl-av:Release ;
+	cmns-av:copyright
+		"Copyright (c) 2013-2025 EDM Council, Inc." ,
+		"Copyright (c) 2013-2025 Object Management Group, Inc."
+		;
+	.
+
+fibo-fnd-plc-loc:BusinessCenter
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-loc:BusinessCenter ;
+	.
+
+fibo-fnd-plc-loc:County
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-loc:County ;
+	.
+
+fibo-fnd-plc-loc:FederalCapitalArea
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-loc:FederalCapitalArea ;
+	.
+
+fibo-fnd-plc-loc:FederalState
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-loc:FederalCapitalArea ;
+	.
+
+fibo-fnd-plc-loc:Municipality
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-loc:Municipality ;
+	.
+
+fibo-fnd-plc-loc:Parcel
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass fibo-fnd-plc-rp:TractOfLand ;
+	.
+
+fibo-fnd-plc-loc:PhysicalLocation
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-loc:PhysicalLocation ;
+	.
+
+fibo-fnd-plc-loc:PopulatedPlace
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-loc:PhysicalLocation ;
+	.
+
+fibo-fnd-plc-loc:RealEstate
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass fibo-fnd-plc-rp:RealEstate ;
+	.
+
+fibo-fnd-plc-loc:hasBusinessCenter
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasBusinessCenter ;
+	.
+
+fibo-fnd-plc-loc:hasCityName
+	a owl:DatatypeProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasCityName ;
+	.
+
+fibo-fnd-plc-loc:hasCountry
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasCountry ;
+	.
+
+fibo-fnd-plc-loc:hasCounty
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasCounty ;
+	.
+
+fibo-fnd-plc-loc:hasCoverageArea
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasCoverageArea ;
+	.
+
+fibo-fnd-plc-loc:hasMunicipality
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasMunicipality ;
+	.
+
+fibo-fnd-plc-loc:hasRegion
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasRegion ;
+	.
+
+fibo-fnd-plc-loc:hasSubdivision
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Locations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasSubdivision ;
+	.
+
+cmns-loc:hasLocation
+	a owl:ObjectProperty ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-loc:hasLocation ;
+	.
+

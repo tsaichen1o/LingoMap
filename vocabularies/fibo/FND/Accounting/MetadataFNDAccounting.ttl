@@ -1,0 +1,57 @@
+# baseURI: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Accounting/MetadataFNDAccounting/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/AnnotationVocabulary/
+
+@base <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Accounting/MetadataFNDAccounting/> .
+@prefix cmns-av: <https://www.omg.org/spec/Commons/AnnotationVocabulary/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fibo-fnd-acc-mod: <https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/MetadataFNDAccounting/> .
+@prefix fibo-fnd-utl-av: <https://spec.edmcouncil.org/fibo/ontology/FND/Utilities/AnnotationVocabulary/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/MetadataFNDAccounting/>
+	a owl:Ontology ;
+	rdfs:label "Metadata for the EDMC-FIBO Foundations (FND) Accounting Module" ;
+	dcterms:abstract "This module contains ontologies of general accounting concepts including currency and the ISO 4217 reference currency codes." ;
+	dcterms:issued "2020-02-24T18:00:00"^^xsd:dateTime ;
+	dcterms:license "https://opensource.org/licenses/MIT"^^xsd:anyURI ;
+	dcterms:modified "2023-01-06T18:00:00"^^xsd:dateTime ;
+	owl:imports
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/AnnotationVocabulary/>
+		;
+	owl:versionIRI <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Accounting/MetadataFNDAccounting/> ;
+	cmns-av:copyright
+		"Copyright (c) 2017-2023 EDM Council, Inc." ,
+		"Copyright (c) 2017-2023 Object Management Group, Inc."
+		;
+	.
+
+fibo-fnd-acc-mod:AccountingModule
+	a
+		owl:NamedIndividual ,
+		fibo-fnd-utl-av:Module
+		;
+	rdfs:label "accounting module" ;
+	dcterms:abstract "This module contains ontologies of general accounting concepts including currency and the ISO 4217 reference currency codes." ;
+	dcterms:hasPart
+		<https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/AccountingEquity/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/CurrencyAmount/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/ISO4217-CurrencyCodes/>
+		;
+	dcterms:license "https://opensource.org/licenses/MIT"^^xsd:anyURI ;
+	dcterms:title
+		"FIBO FND Accounting Module" ,
+		"Financial Industry Business Ontology (FIBO) Foundations (FND) Accounting Module"
+		;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/MetadataFNDAccounting/> ;
+	rdfs:seeAlso <https://spec.edmcouncil.org/fibo/> ;
+	cmns-av:copyright
+		"Copyright (c) 2017-2023 EDM Council, Inc." ,
+		"Copyright (c) 2017-2023 Object Management Group, Inc."
+		;
+	.
+

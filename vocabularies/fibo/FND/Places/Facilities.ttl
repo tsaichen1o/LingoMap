@@ -1,0 +1,169 @@
+# baseURI: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Facilities/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Addresses/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Relations/Relations/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/ContextualDesignators/
+# imports: https://www.omg.org/spec/Commons/Organizations/
+# imports: https://www.omg.org/spec/Commons/RolesAndCompositions/
+
+@base <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Facilities/> .
+@prefix cmns-av: <https://www.omg.org/spec/Commons/AnnotationVocabulary/> .
+@prefix cmns-cxtdsg: <https://www.omg.org/spec/Commons/ContextualDesignators/> .
+@prefix cmns-org: <https://www.omg.org/spec/Commons/Organizations/> .
+@prefix cmns-rlcmp: <https://www.omg.org/spec/Commons/RolesAndCompositions/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fibo-fnd-plc-adr: <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Addresses/> .
+@prefix fibo-fnd-plc-fac: <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities/> .
+@prefix fibo-fnd-plc-rp: <https://spec.edmcouncil.org/fibo/ontology/FND/Places/RealProperty/> .
+@prefix fibo-fnd-rel-rel: <https://spec.edmcouncil.org/fibo/ontology/FND/Relations/Relations/> .
+@prefix fibo-fnd-utl-av: <https://spec.edmcouncil.org/fibo/ontology/FND/Utilities/AnnotationVocabulary/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities/>
+	a owl:Ontology ;
+	rdfs:label "Facilities Ontology" ;
+	dcterms:abstract "This ontology provides scaffolding for use in describing concepts related to facilities, both virtual and physical, including physical sites that provide various facilities." ;
+	dcterms:license """Copyright (c) 2013-2025 EDM Council, Inc.
+		Copyright (c) 2013-2025 Object Management Group, Inc.
+		
+		Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+		
+		See https://opensource.org/licenses/MIT.""" ;
+	owl:imports
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Addresses/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Relations/Relations/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/ContextualDesignators/> ,
+		<https://www.omg.org/spec/Commons/Organizations/> ,
+		<https://www.omg.org/spec/Commons/RolesAndCompositions/>
+		;
+	owl:versionIRI <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Facilities/> ;
+	skos:changeNote
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20141101/Places/Facilities.rdf version of this ontology was modified for the FIBO 2.0 RFC to integrate it with LCC." ,
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20180801/Places/Facilities.rdf version of this ontology was modified to eliminate deprecated elements." ,
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20190901/Places/Facilities.rdf version of this ontology was modified to eliminate circular and ambiguous definitions, and simplify the ontology by merging physical site with site." ,
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20210101/Places/Facilities.rdf version of this ontology was modified to allow a facility to exist at some location that has an address without requiring it to be situated at some site to simplify usage in cases where the site and facility have 100 percent overlap and are not tracked independently." ,
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20220101/Places/Facilities.rdf version of this ontology was modified to address hygiene issues with respect to text formatting." ,
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20220701/Places/Facilities.rdf version of this ontology was modified to allow a facility to be anything rather than a role." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities.rdf version of the ontology was modified to replace additional content that is now available in the OMG Commons Ontology Library (Commons) v1.2 (FND-389)." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities.rdf version of the ontology was modified to use the Commons Ontology Library (Commons) Annotation Vocabulary rather than the OMG's Specification Metadata vocabulary." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities.rdf version of this ontology was modified to integrate with the new real property ontology (LOAN-168)." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities.rdf version of this ontology was modified to replace content that is now available in the OMG Commons Ontology Library (Commons) v1.1 (FND-380)." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities.rdf version of this ontology was modified to use the Commons Ontology Library (Commons) rather than the OMG's Languages, Countries and Codes (LCC), eliminating redundancies in FIBO as appropriate." ,
+		"This ontology was added to Foundations in advance of the December 2014 Long Beach meeting in support of the SEC specification."
+		;
+	fibo-fnd-utl-av:hasMaturityLevel fibo-fnd-utl-av:Release ;
+	cmns-av:copyright
+		"Copyright (c) 2013-2025 EDM Council, Inc." ,
+		"Copyright (c) 2013-2025 Object Management Group, Inc."
+		;
+	.
+
+fibo-fnd-plc-fac:Capability
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:Capability ;
+	.
+
+fibo-fnd-plc-fac:Facility
+	a owl:Class ;
+	rdfs:subClassOf
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-fnd-plc-adr:hasAddress ;
+			owl:onClass fibo-fnd-plc-adr:Address ;
+			owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-fnd-plc-fac:isSituatedAt ;
+			owl:onClass fibo-fnd-plc-fac:Site ;
+			owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-org:provides ;
+			owl:someValuesFrom cmns-org:Capability ;
+		]
+		;
+	rdfs:label "facility" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities/> ;
+	skos:definition "something established to serve a particular purpose, make some course of action or operation easier, or provide some capability or service" ;
+	cmns-av:explanatoryNote "A facility may be concrete (as in a manufacturing facility) or abstract. Concrete facilities may be permanent, semi-permanent, or temporary structures, providing one or more capabilities at a given site. A single site may include multiple facilities and a given facility may span multiple sites." ;
+	.
+
+fibo-fnd-plc-fac:Site
+	a owl:Class ;
+	rdfs:subClassOf
+		cmns-cxtdsg:Context ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-cxtdsg:appliesTo ;
+			owl:onClass fibo-fnd-plc-rp:TractOfLand ;
+			owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-fnd-plc-fac:situates ;
+			owl:someValuesFrom owl:Thing ;
+		]
+		;
+	rdfs:label "site" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities/> ;
+	skos:definition "place, setting, or context in which something, such as a facility, is situated" ;
+	skos:example "Example facilities that may situated at some site include structures and buildings, an archeological dig, the landing location for an aircraft or spacecraft, and the site of a wound. A given site may accommodate multiple facilities." ;
+	cmns-av:explanatoryNote "A physical site has certain characteristics that contribute to the context it provides, including area, shape, accessibility, and in the case of a geographic site, landforms, soil and ground conditions, climate, and so forth." ;
+	.
+
+fibo-fnd-plc-fac:Venue
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-fnd-plc-fac:Site ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-cxtdsg:isApplicableIn ;
+			owl:someValuesFrom owl:Thing ;
+		]
+		;
+	rdfs:label "venue" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities/> ;
+	skos:definition "site where something happens, described in the context of the event or activity that occurs there" ;
+	.
+
+fibo-fnd-plc-fac:isSituatedAt
+	a owl:ObjectProperty ;
+	rdfs:label "is situated at" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities/> ;
+	skos:definition "is placed at" ;
+	cmns-av:explanatoryNote "Something may be situated at some site, or in some setting, situation, or context." ;
+	.
+
+fibo-fnd-plc-fac:situates
+	a owl:ObjectProperty ;
+	rdfs:label "situates" ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Facilities/> ;
+	owl:inverseOf fibo-fnd-plc-fac:isSituatedAt ;
+	skos:definition "indicates the place, setting, or context in which something is placed" ;
+	.
+
+cmns-org:Capability
+	a owl:Class ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty fibo-fnd-rel-rel:involves ;
+		owl:onClass fibo-fnd-plc-fac:Facility ;
+		owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ;
+	] ;
+	.
+

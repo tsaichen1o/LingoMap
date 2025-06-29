@@ -1,0 +1,409 @@
+# baseURI: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Funds/Funds/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/BE/LegalEntities/FormalBusinessOrganizations/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/BE/Trusts/Trusts/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FBC/FinancialInstruments/FinancialInstruments/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FBC/FunctionalEntities/FinancialServicesEntities/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Accounting/AccountingEquity/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Accounting/CurrencyAmount/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/GoalsAndObjectives/Objectives/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Law/LegalCapacity/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Equities/EquityInstruments/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Securities/Pools/
+# imports: https://www.omg.org/spec/Commons/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/Collections/
+# imports: https://www.omg.org/spec/Commons/DatesAndTimes/
+# imports: https://www.omg.org/spec/Commons/Organizations/
+# imports: https://www.omg.org/spec/Commons/RegulatoryAgencies/
+
+@base <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Funds/Funds/> .
+@prefix cmns-av: <https://www.omg.org/spec/Commons/AnnotationVocabulary/> .
+@prefix cmns-col: <https://www.omg.org/spec/Commons/Collections/> .
+@prefix cmns-dt: <https://www.omg.org/spec/Commons/DatesAndTimes/> .
+@prefix cmns-org: <https://www.omg.org/spec/Commons/Organizations/> .
+@prefix cmns-rga: <https://www.omg.org/spec/Commons/RegulatoryAgencies/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fibo-be-le-fbo: <https://spec.edmcouncil.org/fibo/ontology/BE/LegalEntities/FormalBusinessOrganizations/> .
+@prefix fibo-be-tr-tr: <https://spec.edmcouncil.org/fibo/ontology/BE/Trusts/Trusts/> .
+@prefix fibo-fbc-fct-fse: <https://spec.edmcouncil.org/fibo/ontology/FBC/FunctionalEntities/FinancialServicesEntities/> .
+@prefix fibo-fnd-acc-aeq: <https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/AccountingEquity/> .
+@prefix fibo-fnd-acc-cur: <https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/CurrencyAmount/> .
+@prefix fibo-fnd-gao-obj: <https://spec.edmcouncil.org/fibo/ontology/FND/GoalsAndObjectives/Objectives/> .
+@prefix fibo-fnd-law-lcap: <https://spec.edmcouncil.org/fibo/ontology/FND/Law/LegalCapacity/> .
+@prefix fibo-fnd-utl-av: <https://spec.edmcouncil.org/fibo/ontology/FND/Utilities/AnnotationVocabulary/> .
+@prefix fibo-sec-eq-eq: <https://spec.edmcouncil.org/fibo/ontology/SEC/Equities/EquityInstruments/> .
+@prefix fibo-sec-fund-fund: <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> .
+@prefix fibo-sec-sec-pls: <https://spec.edmcouncil.org/fibo/ontology/SEC/Securities/Pools/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/>
+	a owl:Ontology ;
+	rdfs:label "Funds Ontology"@en ;
+	dcterms:abstract "This ontology defines fundamental concepts about funds and collective investment vehicles (CIVs)." ;
+	dcterms:contributor
+		"Thematix Partners LLC" ,
+		"Wells Fargo Bank, N.A."
+		;
+	dcterms:license """Copyright (c) 2018-2025 EDM Council, Inc.
+Copyright (c) 2018-2025 Object Management Group, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+		See https://opensource.org/licenses/MIT.""" ;
+	owl:imports
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/BE/LegalEntities/FormalBusinessOrganizations/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/BE/Trusts/Trusts/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FBC/FinancialInstruments/FinancialInstruments/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FBC/FunctionalEntities/FinancialServicesEntities/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Accounting/AccountingEquity/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Accounting/CurrencyAmount/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/GoalsAndObjectives/Objectives/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Law/LegalCapacity/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Equities/EquityInstruments/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Securities/Pools/> ,
+		<https://www.omg.org/spec/Commons/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/Collections/> ,
+		<https://www.omg.org/spec/Commons/DatesAndTimes/> ,
+		<https://www.omg.org/spec/Commons/Organizations/> ,
+		<https://www.omg.org/spec/Commons/RegulatoryAgencies/>
+		;
+	owl:versionIRI <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/SEC/Funds/Funds/> ;
+	skos:changeNote
+		"The https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds.rdf version of the ontology was modified to use the Commons Ontology Library (Commons) Annotation Vocabulary rather than the OMG's Specification Metadata vocabulary." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds.rdf version of this ontology was modified to address text formatting hygiene issues." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds.rdf version of this ontology was modified to eliminate a deprecated element for SpecialPurposeVehicle, which was moved to Pools last quarter." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds.rdf version of this ontology was modified to move the definition of SpecialPurposeVehicle to the Pools ontology to make it available for use more generally." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds.rdf version of this ontology was modified to replace additional content that is now available in the OMG Commons Ontology Library (Commons) v1.2 (FND-389), and to add the notion of a private credit fund and adjust inconsistencies in private equity fund (SEC-203)." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds.rdf version of this ontology was modified to replace the original fibo-sec-fnd-fnd prefix with fibo-sec-fund-fund for the sake of clarity and to change the restriction on LegalFundStructure from an equivalence to a subclass relationship to address a reasoning error as well as adding a missing restriction on jurisdiction." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds.rdf version of this ontology was modified to use the Commons Ontology Library (Commons) rather than the OMG's Languages, Countries and Codes (LCC), eliminating redundancies in FIBO as appropriate."
+		;
+	fibo-fnd-utl-av:hasMaturityLevel fibo-fnd-utl-av:Release ;
+	cmns-av:copyright
+		"Copyright (c) 2018-2025 EDM Council, Inc." ,
+		"Copyright (c) 2018-2025 Object Management Group, Inc."
+		;
+	.
+
+fibo-sec-fund-fund:ClosedEndInvestment
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-sec-sec-pls:ManagedInvestment ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-sec-fund-fund:isOpenEnded ;
+			owl:hasValue "false"^^xsd:boolean ;
+		]
+		;
+	rdfs:label "closed-end investment"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "investment fund that has a fixed number of shares offered by an investment company through an initial public offering"@en ;
+	cmns-av:synonym "closed-end fund"@en ;
+	.
+
+fibo-sec-fund-fund:CollectiveInvestmentVehicle
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass fibo-sec-sec-pls:CollectiveInvestmentVehicle ;
+	.
+
+fibo-sec-fund-fund:ExchangeTradedFund
+	a owl:Class ;
+	rdfs:subClassOf fibo-sec-fund-fund:OpenEndInvestment ;
+	rdfs:label "exchange-traded fund"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "investment fund whose fund units are traded on an exchange, much like stocks"@en ;
+	cmns-av:abbreviation "ETF"@en ;
+	cmns-av:adaptedFrom "ISO 10962:2019 Securities and related financial instruments - Classification of financial instruments (CFI) code, Fourth edition, October 2019"@en ;
+	cmns-av:explanatoryNote "An ETF holds assets such as stocks, commodities, or bonds, and trades close to its net asset value over the course of the trading day. Most ETFs track an index, such as a stock, bond, or commodity index."@en ;
+	.
+
+fibo-sec-fund-fund:FundContract
+	a owl:Class ;
+	rdfs:subClassOf fibo-be-le-fbo:OrganizationCoveringAgreement ;
+	rdfs:label "fund contract"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "contract that embodies and defines the fund legal form in cases where there is no independent organization"@en ;
+	.
+
+fibo-sec-fund-fund:FundOfFunds
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-sec-sec-pls:ManagedInvestment ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-sec-fund-fund:hasSubFund ;
+			owl:someValuesFrom fibo-sec-sec-pls:CollectiveInvestmentVehicle ;
+		]
+		;
+	rdfs:label "fund of funds"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "investment fund that invests directly in other investment funds rather than investing in stocks, bonds, and other securities"@en ;
+	cmns-av:adaptedFrom "ISO 10962:2019 Securities and related financial instruments - Classification of financial instruments (CFI) code, Fourth edition, October 2019"@en ;
+	cmns-av:synonym "umbrella fund"@en ;
+	.
+
+fibo-sec-fund-fund:FundUnit
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-sec-eq-eq:Share ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-fnd-acc-cur:hasCurrency ;
+			owl:someValuesFrom fibo-fnd-acc-cur:Currency ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-col:isPartOf ;
+			owl:someValuesFrom fibo-sec-sec-pls:PooledFund ;
+		]
+		;
+	rdfs:label "fund unit"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "security representing a unit in a fund"@en ;
+	.
+
+fibo-sec-fund-fund:HedgeFund
+	a owl:Class ;
+	rdfs:subClassOf fibo-sec-fund-fund:OpenEndInvestment ;
+	rdfs:label "hedge fund"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "investment fund that pursues a total return and is usually open to qualified investors only"@en ;
+	cmns-av:adaptedFrom "ISO 10962:2019 Securities and related financial instruments - Classification of financial instruments (CFI) code, Fourth edition, October 2019"@en ;
+	.
+
+fibo-sec-fund-fund:LegalFundStructure
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-fnd-law-lcap:LegalConstruct ,
+		[
+			a owl:Class ;
+			owl:unionOf (
+				cmns-org:LegalEntity
+				fibo-sec-fund-fund:FundContract
+			) ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-rga:isGovernedBy ;
+			owl:someValuesFrom cmns-rga:Jurisdiction ;
+		]
+		;
+	rdfs:label "legal fund structure"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "structure of a fund with respect to its legal formation in some jurisdiction"@en ;
+	.
+
+fibo-sec-fund-fund:MutualFund
+	a owl:Class ;
+	rdfs:subClassOf fibo-sec-fund-fund:OpenEndInvestment ;
+	rdfs:label "mutual fund"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "open-end professionally managed investment fund established for the purpose of investing in securities such as stocks, bonds, money market instruments and similar assets"@en ;
+	cmns-av:adaptedFrom "ISO 10962:2019 Securities and related financial instruments - Classification of financial instruments (CFI) code, Fourth edition, October 2019"@en ;
+	cmns-av:synonym "standard (vanilla) investment fund"@en ;
+	.
+
+fibo-sec-fund-fund:OpenEndInvestment
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-sec-sec-pls:ManagedInvestment ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-sec-fund-fund:isOpenEnded ;
+			owl:hasValue "true"^^xsd:boolean ;
+		]
+		;
+	rdfs:label "open-end investment"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	owl:disjointWith fibo-sec-fund-fund:ClosedEndInvestment ;
+	skos:definition "investment fund that offered through a fund company that sells shares directly to investors"@en ;
+	cmns-av:synonym "open-end fund"@en ;
+	.
+
+fibo-sec-fund-fund:PensionFund
+	a owl:Class ;
+	rdfs:subClassOf fibo-sec-sec-pls:ManagedInvestment ;
+	rdfs:label "pension fund"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "investment fund run by a financial intermediary on behalf of an organization and its employees/members"@en ;
+	cmns-av:abbreviation "ETF"@en ;
+	cmns-av:adaptedFrom "ISO 10962:2019 Securities and related financial instruments - Classification of financial instruments (CFI) code, Fourth edition, October 2019"@en ;
+	cmns-av:explanatoryNote "A pension fund is a common asset pool meant to generate stable growth over a long-term investment horizon."@en ;
+	.
+
+fibo-sec-fund-fund:PrivateCreditFund
+	a owl:Class ;
+	rdfs:subClassOf fibo-sec-sec-pls:PrivateFund ;
+	rdfs:label "private credit fund"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	owl:disjointWith fibo-sec-fund-fund:PrivateEquityFund ;
+	skos:definition "investment vehicle that provides loans or other forms of credit to companies, typically outside of the traditional banking system"@en ;
+	cmns-av:explanatoryNote """These funds are managed by asset managers, private equity firms or specialized lenders and cater to institutional investors, high-net-worth individuals, and family offices. The kinds of loans they provide include senior secured loans, mezzanine debt, unitranche loans, and special situations financing through direct lending to mid-sized companies. These funds are typically illiquid, with long investment horizons (5–10 years). They generally provide higher returns than traditional fixed-income instruments, but with greater risk due to borrower default potential. Key features of private credit funds include:
+- Loans are held on the fund's balance sheet
+- Returns come primarily from interest income and potential capital appreciation
+- Often involve direct negotiations and customized loan terms"""@en ;
+	.
+
+fibo-sec-fund-fund:PrivateEquityFund
+	a owl:Class ;
+	rdfs:subClassOf fibo-sec-sec-pls:PrivateFund ;
+	rdfs:label "private equity fund"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "investment fund used for making investments in various equity (and to a lesser extent debt) securities according to an investment strategy associated with private equity"@en ;
+	cmns-av:abbreviation "PE fund"@en ;
+	cmns-av:adaptedFrom "ISO 10962:2019 Securities and related financial instruments - Classification of financial instruments (CFI) code, Fourth edition, October 2019"@en ;
+	cmns-av:explanatoryNote "Private equity funds are typically structured as limited partnerships or limited liability companies, wherein investors are limited partners, and the fund is managed by one or more general partners. It is composed of investors and funds that invest directly in private companies, or that engage in buyouts of public companies, resulting in the delisting of the public equity."@en ;
+	.
+
+fibo-sec-fund-fund:RealEstateInvestmentTrust
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-sec-sec-pls:ManagedInvestment ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-sec-fund-fund:hasLegalStructure ;
+			owl:someValuesFrom fibo-be-tr-tr:Trust ;
+		]
+		;
+	rdfs:label "real estate investment trust"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "investment fund that offers shares/units to the public and invests in real estate directly"@en ;
+	cmns-av:abbreviation "REIT"@en ;
+	cmns-av:adaptedFrom "ISO 10962:2019 Securities and related financial instruments - Classification of financial instruments (CFI) code, Fourth edition, October 2019"@en ;
+	cmns-av:explanatoryNote "Real estate investment trusts own, and in most cases operate, income-producing real estate. REITs own many types of commercial real estate, ranging from office and apartment buildings to warehouses, hospitals, shopping centers, hotels and commercial forests. Some REITs engage in financing real estate."@en ;
+	.
+
+fibo-sec-fund-fund:SovereignWealthFund
+	a owl:Class ;
+	rdfs:subClassOf fibo-sec-sec-pls:CollectiveInvestmentVehicle ;
+	rdfs:label "sovereign wealth fund"@en ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	skos:definition "state-owned investment fund that consists of pools of money derived from a country's reserves"@en ;
+	cmns-av:explanatoryNote "Sovereign wealth funds include the International Monetary Fund, whose corresponding legal entity is a polity."@en ;
+	cmns-av:synonym
+		"social wealth fund"@en ,
+		"sovereign investment fund"@en
+		;
+	.
+
+fibo-sec-fund-fund:hasLegalStructure
+	a owl:ObjectProperty ;
+	rdfs:label "has legal structure"@en ;
+	rdfs:domain fibo-sec-sec-pls:PooledFund ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	rdfs:range fibo-sec-fund-fund:LegalFundStructure ;
+	skos:definition "indicates the legal form that the fund takes"@en ;
+	.
+
+fibo-sec-fund-fund:hasSubFund
+	a owl:ObjectProperty ;
+	rdfs:subPropertyOf cmns-col:hasPart ;
+	rdfs:label "has sub-fund"@en ;
+	rdfs:domain fibo-sec-sec-pls:PooledFund ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	rdfs:range fibo-sec-sec-pls:PooledFund ;
+	skos:definition "relates a pooled fund to a sub-fund that is a constituent of the parent fund"@en ;
+	.
+
+fibo-sec-fund-fund:isOpenEnded
+	a owl:DatatypeProperty ;
+	rdfs:label "is open ended"@en ;
+	rdfs:domain fibo-sec-sec-pls:PooledFund ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	rdfs:range xsd:boolean ;
+	skos:definition "indicates whether the fund is an open-end/closed-end fund"@en ;
+	.
+
+fibo-sec-fund-fund:isPrivate
+	a owl:DatatypeProperty ;
+	rdfs:label "is private"@en ;
+	rdfs:domain fibo-sec-sec-pls:PooledFund ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	rdfs:range xsd:boolean ;
+	skos:definition "indicates that the fund does not offer its securities to the general public"@en ;
+	cmns-av:explanatoryNote "In the U.S., private funds are exempt from certain regulations under the Investment Company Act of 1940. Common types include venture capital funds, private equity funds, and some hedge funds. They often target illiquid assets or use aggressive strategies, offering flexibility compared to public funds."@en ;
+	.
+
+fibo-sec-fund-fund:isSubFundOf
+	a owl:ObjectProperty ;
+	rdfs:subPropertyOf cmns-col:isPartOf ;
+	rdfs:label "is sub-fund of"@en ;
+	rdfs:domain fibo-sec-sec-pls:PooledFund ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/SEC/Funds/Funds/> ;
+	rdfs:range fibo-sec-sec-pls:PooledFund ;
+	owl:inverseOf fibo-sec-fund-fund:hasSubFund ;
+	skos:definition "relates a pooled fund to a parent fund"@en ;
+	.
+
+fibo-sec-sec-pls:CollectiveInvestmentVehicle
+	a owl:Class ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty fibo-sec-fund-fund:hasLegalStructure ;
+		owl:someValuesFrom fibo-sec-fund-fund:LegalFundStructure ;
+	] ;
+	.
+
+fibo-sec-sec-pls:ManagedInvestment
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-sec-sec-pls:CollectiveInvestmentVehicle ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-sec-fund-fund:isOpenEnded ;
+			owl:someValuesFrom xsd:boolean ;
+		]
+		;
+	cmns-av:adaptedFrom "ISO 10962:2019 Securities and related financial instruments - Classification of financial instruments (CFI) code, Fourth edition, October 2019"@en ;
+	cmns-av:explanatoryNote "A managed investment is an investment vehicle that consists of a pool of funds collected from many different investors run by a management company."@en ;
+	cmns-av:synonym "investment fund"@en ;
+	.
+
+fibo-sec-sec-pls:PooledFund
+	a owl:Class ;
+	rdfs:subClassOf
+		fibo-fnd-acc-aeq:FinancialAsset ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-sec-fund-fund:isPrivate ;
+			owl:allValuesFrom xsd:boolean ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-fbc-fct-fse:hasDateEstablished ;
+			owl:someValuesFrom cmns-dt:ExplicitDate ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty fibo-fnd-gao-obj:hasObjective ;
+			owl:someValuesFrom fibo-fnd-gao-obj:InvestmentObjective ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty cmns-col:hasPart ;
+			owl:someValuesFrom fibo-sec-fund-fund:FundUnit ;
+		]
+		;
+	cmns-av:explanatoryNote "A fund can be established for any purpose, such as a municipality setting aside money for a construction project, monies designated to endow a university chair or for scholarships, or funds set aside by insurance companies to settle claims."@en ;
+	cmns-av:synonym "fund"@en ;
+	.
+
+fibo-sec-sec-pls:PrivateFund
+	a owl:Class ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty fibo-sec-fund-fund:isPrivate ;
+		owl:hasValue "true"^^xsd:boolean ;
+	] ;
+	.
+

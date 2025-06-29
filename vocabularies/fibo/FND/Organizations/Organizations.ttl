@@ -1,0 +1,192 @@
+# baseURI: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Organizations/Organizations/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/AgentsAndPeople/Agents/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/GoalsAndObjectives/Objectives/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Addresses/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Relations/Relations/
+# imports: https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/AnnotationVocabulary/
+# imports: https://www.omg.org/spec/Commons/Collections/
+# imports: https://www.omg.org/spec/Commons/ContextualDesignators/
+# imports: https://www.omg.org/spec/Commons/Designators/
+# imports: https://www.omg.org/spec/Commons/Identifiers/
+# imports: https://www.omg.org/spec/Commons/Organizations/
+# imports: https://www.omg.org/spec/Commons/PartiesAndSituations/
+# imports: https://www.omg.org/spec/Commons/RolesAndCompositions/
+# imports: https://www.omg.org/spec/Commons/TextDatatype/
+
+@base <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Organizations/Organizations/> .
+@prefix cmns-av: <https://www.omg.org/spec/Commons/AnnotationVocabulary/> .
+@prefix cmns-org: <https://www.omg.org/spec/Commons/Organizations/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fibo-fnd-org-org: <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> .
+@prefix fibo-fnd-utl-av: <https://spec.edmcouncil.org/fibo/ontology/FND/Utilities/AnnotationVocabulary/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/>
+	a owl:Ontology ;
+	rdfs:label "Organizations Ontology" ;
+	dcterms:abstract "This ontology defines high-level concepts for organizations and related terms, which is purposefully underspecified to facilitate mapping to specific organization ontologies, such as the W3C organization ontology, organization from a BMM or BPMN perspective, organization from a records management (RMS) perspective, and so forth." ;
+	dcterms:license """Copyright (c) 2013-2025 EDM Council, Inc.
+		Copyright (c) 2013-2025 Object Management Group, Inc.
+		
+		Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+		
+		See https://opensource.org/licenses/MIT.""" ;
+	owl:imports
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/AgentsAndPeople/Agents/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/GoalsAndObjectives/Objectives/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Places/Addresses/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Relations/Relations/> ,
+		<https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Utilities/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/AnnotationVocabulary/> ,
+		<https://www.omg.org/spec/Commons/Collections/> ,
+		<https://www.omg.org/spec/Commons/ContextualDesignators/> ,
+		<https://www.omg.org/spec/Commons/Designators/> ,
+		<https://www.omg.org/spec/Commons/Identifiers/> ,
+		<https://www.omg.org/spec/Commons/Organizations/> ,
+		<https://www.omg.org/spec/Commons/PartiesAndSituations/> ,
+		<https://www.omg.org/spec/Commons/RolesAndCompositions/> ,
+		<https://www.omg.org/spec/Commons/TextDatatype/>
+		;
+	owl:versionIRI <https://spec.edmcouncil.org/fibo/ontology/master/2025Q1/FND/Organizations/Organizations/> ;
+	skos:changeNote
+		"The http://www.omg.org/spec/EDMC-FIBO/FND/20160201/Organizations/Organizations.rdf version of this ontology was modified per the FIBO 2.0 RFC, to revise the definition of Organization per ISO 6523." ,
+		"""The http://www.omg.org/spec/FIBO/Foundations/20130601/Organizations/Organizations.owl version of the ontology was revised in advance of the September 2013 New Brunswick, NJ meeting, as follows:
+	(1) to use slash style URI/IRIss (also called 303 URIs, vs. hash style) as required to support server side processing 
+	(2) to use version-independent IRIs for all definitions internally as opposed to version-specific IRIs
+	(3) to change the file suffix from .owl to .rdf to increase usability in RDF tools
+	(4) to use 4-level abbreviations and corresponding namespace prefixes for all FIBO ontologies, reflecting a family/specification/module/ontology structure
+	(5) to incorporate changes to the specification metadata to support documentation at the family, specification, module, and ontology level, similar to the abbreviations.""" ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of the ontology was modified to replace additional content that is now available in the OMG Commons Ontology Library (Commons) v1.2 (FND-389). Note that this ontology, which only contains deprecated elements as of this modification, will be eliminated from FIBO at a future date." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of the ontology was modified to use the Commons Ontology Library (Commons) Annotation Vocabulary rather than the OMG's Specification Metadata vocabulary." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified per the issue resolutions identified in the FIBO FND 1.0 FTF report and in https://spec.edmcouncil.org/fibo/ontology/FND/1.0/AboutFND-1.0/." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified per the issue resolutions identified in the FIBO FND 1.1 RTF report, to revise a restriction on Organization to reference PhysicalAddress (vs. PostalAddress)." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified to address hygiene issues with respect to text formatting." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified to allow the Organizations ontology to import Parties, rather than the other way around, to simplify the class hierarchy for ease of use in data mapping and alignment, including moving OrganizationMember from Parties to Organizations, and to add the basis for structured organization name representation." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified to make having a goal optional for any given organization." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified to reflect the merge of Goals and Objectives." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified to replace content that is now available in the OMG Commons Ontology Library (Commons) v1.1 (FND-380)." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified to revise the definition of Organization to broaden its scope to individuals that may or may not be people and eliminate duplication with concepts in LCC." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified to to move basic organization sub-unit and identifier definitions to FND from BE due to their fundamental nature and reusability and add links to the W3C organization ontology to provide hints as to which classes in this ontology map to the W3C ontology. Note that mappings are approximate and thus we used seeAlso rather than OWL equivalence relations." ,
+		"The https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations.rdf version of this ontology was modified to use the Commons Ontology Library (Commons) rather than the OMG's Languages, Countries and Codes (LCC) and to eliminate redundancies in FIBO as appropriate."
+		;
+	fibo-fnd-utl-av:hasMaturityLevel fibo-fnd-utl-av:Release ;
+	cmns-av:copyright
+		"Copyright (c) 2013-2025 EDM Council, Inc." ,
+		"Copyright (c) 2013-2025 Object Management Group, Inc."
+		;
+	.
+
+fibo-fnd-org-org:MemberBearingOrganization
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:MemberBearingOrganization ;
+	.
+
+fibo-fnd-org-org:Membership
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:Membership ;
+	.
+
+fibo-fnd-org-org:Organization
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:Organization ;
+	.
+
+fibo-fnd-org-org:OrganizationIdentificationScheme
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:OrganizationIdentificationScheme ;
+	.
+
+fibo-fnd-org-org:OrganizationIdentifier
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:OrganizationIdentifier ;
+	.
+
+fibo-fnd-org-org:OrganizationMember
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:OrganizationMember ;
+	.
+
+fibo-fnd-org-org:OrganizationName
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:OrganizationName ;
+	.
+
+fibo-fnd-org-org:OrganizationPartIdentifier
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:OrganizationSubUnitIdentifier ;
+	.
+
+fibo-fnd-org-org:OrganizationalSubUnit
+	a owl:Class ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentClass cmns-org:OrganizationalSubUnit ;
+	.
+
+fibo-fnd-org-org:hasMembership
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-org:hasMembership ;
+	.
+
+fibo-fnd-org-org:hasOrganizationMember
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-org:hasOrganizationMember ;
+	.
+
+fibo-fnd-org-org:hasSubUnit
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-org:hasSubUnit ;
+	.
+
+fibo-fnd-org-org:isMembershipPartyIn
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-org:isMembershipPartyIn ;
+	.
+
+fibo-fnd-org-org:isOrganizationMember
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-org:isOrganizationMember ;
+	.
+
+fibo-fnd-org-org:isSubUnitOf
+	a owl:ObjectProperty ;
+	rdfs:isDefinedBy <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> ;
+	owl:deprecated "true"^^xsd:boolean ;
+	owl:equivalentProperty cmns-org:isSubUnitOf ;
+	.
+
