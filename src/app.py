@@ -350,7 +350,12 @@ def main():
                         with st.form("manual_mapping"):
                             part_of = st.text_input("Part of (belongs to entity)", value=suggestion.get('part_of', ''))
                             maps_to_property = st.text_input("Maps to Property", value=suggestion.get('maps_to_property', ''))
-                            confidence = st.slider("Confidence index", 1, 100, value=suggestion.get('confidence_score', 50))
+                            confidence_value = suggestion.get('confidence_score', 50)
+                            try:
+                                confidence_value = int(round(float(confidence_value)))
+                            except (ValueError, TypeError):
+                                confidence_value = 50
+                            confidence = st.slider("Confidence index", 1, 100, value=confidence_value, step=1)
                             justification = st.text_area("Justification", value=suggestion.get('justification', ''))
                             
                             if st.form_submit_button("💾 Save modifications"):
