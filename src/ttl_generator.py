@@ -40,6 +40,32 @@ TTL_PREFIXES = """
 
 """
 
+def format_conditional_rules_to_ttl(mappings: Dict[str, Any]) -> str:
+    """Formats conditional rules into human-readable TTL comments."""
+    ttl_blocks = []
+    # 過濾出所有被識別為規則的建議
+    rules = [m for m in mappings.values() if m.get("isRule")]
+    
+    if not rules:
+        return ""
+
+    for rule in rules:
+        condition = rule.get('condition', {})
+        action = rule.get('action', {})
+        block = f"""
+# --- Conditional Rule: {rule.get('ruleId', 'N/A')} ---
+# @description: {rule.get('justification', '')}
+# @if-column: "{rule.get('sourceColumn')}"
+# @if-operator: "{condition.get('operator')}"
+# @if-value: "{condition.get('value')}"
+# @then-action: "{action.get('type')}"
+# @then-value: <{action.get('value')}>
+# @on-entity: <#{rule.get('targetEntity')}>
+"""
+        ttl_blocks.append(block)
+    
+    return "\n# --- 4. Conditional Transformation Rules (for ETL tool) ---\n" + "\n".join(ttl_blocks)
+
 def format_entities_to_ttl(entities: List[Dict[str, Any]]) -> str:
     """Formats the list of entities into TTL syntax."""
     if not entities:
@@ -135,12 +161,18 @@ def generate_semantic_blueprint_ttl(
     # 4. Format column mappings
     mappings_section = format_column_mappings_to_ttl(column_mappings)
     
+    # 4.5 Format conditional rules
+    rules_section = format_conditional_rules_to_ttl(column_mappings)
+    
     # 5. Combine all sections into the final TTL string
+    property_mappings = {k: v for k, v in column_mappings.items() if not v.get("isRule")}
+    mappings_section = format_column_mappings_to_ttl(property_mappings)
     final_ttl = (
         prefixes_section +
         entities_section +
         associations_section +
-        mappings_section
+        mappings_section +
+        rules_section
     )
     
     logging.info("TTL blueprint generation complete.")
