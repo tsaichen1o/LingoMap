@@ -250,14 +250,20 @@ def main():
         if engine is not None:
             with st.spinner("Analyzing columns and communicating with Gemini... This may take a moment."):
                 n_clusters = st.session_state.get('n_clusters', 8)
-                # The integer n_clusters is passed directly here.
-                generated_entities = engine.generate_semantic_entities(df, n_clusters)
-                st.session_state.generated_entities = generated_entities
+                
+                # --- THIS IS THE FIX ---
+                # Correctly unpack the tuple returned by the function
+                clusters, entities = engine.generate_semantic_entities(df, n_clusters)
+                
+                # Store them in separate session state variables
+                st.session_state.llm_clusters = clusters
+                st.session_state.generated_entities = entities
+                # --------------------
             st.success("Entity Conception complete! ✅")
         else:
             st.error("Core engine initialization failed. Please check your API key or environment settings.")
 
-
+    st.divider()
     st.header("Stage 2: Relationship Definition")
     st.write("Based on the entities defined above, use an LLM to infer the logical connections between them.")
         
@@ -294,7 +300,7 @@ def main():
 
             # --- MODIFIED SECTION END ---
             
-        st.divider()
+        # st.divider()
         
         if st.button("🚀 Define Entity Relationships", use_container_width=True, type="primary"):
             engine = get_mapping_engine()
@@ -353,8 +359,10 @@ def main():
             columns = cluster_info.get('columns', [])
             
             with st.expander(f"**Entity Group: {cluster_name}** ({len(columns)} columns)"):
+                all_analyzed = all(col in st.session_state.get('all_suggestions', {}) for col in columns)
+                group_icon = "🟢" if all_analyzed else "⚪️"
                 # --- 新增：分析整個群組的按鈕 ---
-                if st.button(f"Analyze All Columns in '{cluster_name}'", key=f"btn_group_{cluster_name}", type="primary"):
+                if st.button(f"{group_icon} Analyze All Columns in '{cluster_name}'", key=f"btn_group_{cluster_name}", type="primary"):
                     engine = get_mapping_engine()
                     
                     # 初始化存儲建議的地方
@@ -382,10 +390,13 @@ def main():
                     st.success(f"Successfully analyzed all columns in '{cluster_name}'!")
                 # 為每個按鈕設置一個唯一的 key
                 for col in columns:
-                    if st.button(f"Analyze `{col}`", key=f"btn_{col}"):
+                    analyzed = col in st.session_state.get('all_suggestions', {})
+                    icon = "🟢" if analyzed else "⚪️"
+                    btn_label = f"{icon} Analyze `{col}`"
+                    if st.button(btn_label, key=f"btn_{col}"):
                         st.session_state.current_column = col
-                        st.session_state.current_suggestion = None # 清除舊的建議
-                        st.rerun() # 重新整理以觸發分析
+                        st.session_state.current_suggestion = None
+                        st.rerun()
 
         # Display analysis and suggestion for the selected column
         if st.session_state.current_column:
@@ -416,6 +427,37 @@ def main():
             if suggestion:
                 if "error" in suggestion:
                     st.error(suggestion["error"])
+                # --- NEW: Check if the suggestion is a rule or a mapping ---
+                if suggestion.get("isRule"):
+                    with st.container(border=True):
+                        st.info(f"**Conditional Rule for `{suggestion.get('sourceColumn')}`**")
+                        st.markdown(f"**Rule Type:** `{suggestion.get('ruleType', 'N/A')}`")
+                        condition_data = suggestion.get('condition', {})
+                        action_data = suggestion.get('action', {})
+                        # --- FIX: Ensure condition and action are dictionaries ---
+                        # Check if they are actually dictionaries before trying to access their items
+                        if isinstance(condition_data, dict) and isinstance(action_data, dict):
+                            # If they are dicts, we can safely use .get()
+                            operator = condition_data.get('operator', '[op]')
+                            condition_value = condition_data.get('value', '[val]')
+                            action_type = action_data.get('type', '[type]')
+                            action_value = action_data.get('value', '[val]')
+
+                            st.code(
+                                f"IF {suggestion.get('sourceColumn')} {operator} '{condition_value}' "
+                                f"THEN {action_type} `{action_value}` "
+                                f"ON `{suggestion.get('targetEntity')}`",
+                                language="bash"
+                            )
+                        else:
+                            # If they are not dicts, it indicates a malformed response from the LLM.
+                            st.error("Rule format from AI is invalid. Could not parse 'condition' or 'action'.")
+                            st.json({"expected_condition_format": {"operator": "...", "value": "..."} , "received_condition": condition_data})
+                            st.json({"expected_action_format": {"type": "...", "value": "..."} , "received_action": action_data})
+                        # --- END OF FIX ---
+
+                        with st.expander("View Justification"):
+                            st.write(f"*{suggestion.get('justification', 'No justification.')}*")
                 else:
                     with st.container(border=True):
                         st.markdown("##### AI Mapping Suggestion")
@@ -443,6 +485,7 @@ def main():
                             st.caption(f"Mapping Type: `{suggestion.get('mappingType', 'N/A')}`")
     
     # --- STAGE 4: FINAL BLUEPRINT GENERATION ---
+    st.divider()
     st.header("Stage 4: Generate Final Semantic Blueprint")
     # 只有在至少有一些欄位映射建議產生後，才顯示這個階段
     if st.session_state.get('all_suggestions'):
