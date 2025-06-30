@@ -11,3 +11,5 @@ __pycache__/
 */lingomap_db/
 # Ignore all report files
 *_report.json
+FDIC_Insured_Banks.csv
+SubmissionManifest.txt
