@@ -14,8 +14,8 @@ sys.path.append(os.path.dirname(__file__))
 
 try:
     from core_engine import CoreMappingEngine
-    from data_profiler import profile_column
     from column_clusterer import cluster_columns
+    from ttl_generator import generate_semantic_blueprint_ttl
 except ImportError as e:
     st.error(f"Error: Unable to import necessary modules. Please check if your file structure is correct. Error message: {e}")
     st.stop()
@@ -308,28 +308,6 @@ def main():
             else:
                 st.error("Core engine initialization failed. Please check your API key or environment settings.")
 
-    # --- STAGE 2: DETAILED COLUMN MAPPING ---
-    # (The rest of your UI for detailed mapping would go here)
-    # st.header("Stage 2: Detailed Column Mapping")
-    # if not st.session_state.generated_entities:
-    #     st.info("Please run Stage 1 'Generate Core Entities' first.")
-    # else:
-    #     # Your previous logic for selecting columns from clusters and suggesting mappings
-    #     # can be adapted here.
-    #     st.write("Select a column from the groups below to get a detailed mapping suggestion.")
-        
-    #     clusters = cluster_columns(df)
-    #     for i, cluster_info in enumerate(clusters):
-    #         cluster_name = cluster_info.get('name', f"Group {i+1}")
-    #         columns = cluster_info.get('columns', [])
-            
-    #         with st.expander(f"**{cluster_name}** ({len(columns)} columns)"):
-    #             for col in columns:
-    #                 if st.button(col, key=f"btn_{col}"):
-    #                     st.session_state.current_column = col
-    #                     # This would trigger the detailed mapping logic from your original file
-    #                     st.info(f"Selected '{col}' for detailed mapping. (Logic to be implemented)")
-    #                     st.rerun()
     
     if st.session_state.generated_relationships:
         st.subheader("🔗 AI-Generated Relationship Links")
@@ -463,93 +441,49 @@ def main():
                         with st.expander("View AI's Justification"):
                             st.write(f"*{suggestion.get('justification', 'No justification provided.')}*")
                             st.caption(f"Mapping Type: `{suggestion.get('mappingType', 'N/A')}`")
-
-# --- Generate Turtle Mapping Rules ---
-def generate_rules_ttl(mappings):
-    """Generate TTL mapping rules"""
-    # 1. Define all required namespace prefixes
-    prefixes = """
-@prefix fibo-be-le-fbo: <https://spec.edmcouncil.org/fibo/ontology/BE/LegalEntities/FormalBusinessOrganizations/> .
-@prefix fibo-fbc-fct-fse: <https://spec.edmcouncil.org/fibo/ontology/FBC/FunctionalEntities/FinancialServicesEntities/> .
-@prefix fibo-fnd-plc-adr: <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Addresses/> .
-@prefix fibo-fnd-rel-rel: <https://spec.edmcouncil.org/fibo/ontology/FND/Relations/Relations/> .
-@prefix fibo-fnd-dt-fd: <https://spec.edmcouncil.org/fibo/ontology/FND/DatesAndTimes/FinancialDates/> .
-@prefix fibo-ind-ei-ei: <https://spec.edmcouncil.org/fibo/ontology/IND/EconomicIndicators/EconomicIndicators/> .
-@prefix fibo-fbc-pas-caa: <https://spec.edmcouncil.org/fibo/ontology/FBC/ProductsAndServices/ClientsAndAccounts/> .
-@prefix cmns-cls: <https://www.omg.org/spec/Commons/Classifiers/> .
-@prefix cmns-lng: <https://www.omg.org/spec/Commons/Languages/> .
-@prefix cmns-av: <https://www.omg.org/spec/Commons/AnnotationVocabulary/> .
-@prefix cmns-col: <https://www.omg.org/spec/Commons/Collections/> .
-@prefix cmns-cxtdsg: <https://www.omg.org/spec/Commons/ContextualDesignators/> .
-@prefix cmns-dt: <https://www.omg.org/spec/Commons/DatesAndTimes/> .
-@prefix cmns-id: <https://www.omg.org/spec/Commons/Identifiers/> .
-@prefix cmns-pt: <https://www.omg.org/spec/Commons/PartiesAndSituations/> .
-@prefix cmns-qtu: <https://www.omg.org/spec/Commons/QuantitiesAndUnits/> .
-@prefix cmns-txt: <https://www.omg.org/spec/Commons/TextDatatype/> .
-@prefix cmns-utl: <https://www.omg.org/spec/Commons/Utilities/> .
-@prefix mymap: <http://example.org/mapping/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-
-"""
-
-    # 2. Iterate through all accepted mappings in session_state
-    mapping_blocks = []
-    for column_name, suggestion in mappings.items():
-        # Skip rejected or invalid mappings
-        if suggestion.get('status') == 'rejected' or not suggestion.get('maps_to_property'):
-            continue
-        
-        mapping_type = suggestion.get('mapping_type', 'ColumnMapping')  # Default is ColumnMapping
-        map_name = f"map_{column_name.replace(' ', '_')}"  # Create a valid turtle subject name
-        
-        block = f"<#{map_name}>\n"
-
-        # 3. Generate different Turtle syntax blocks based on different mapping_types
-        if mapping_type == "ColumnMapping":
-            block += f"    a mymap:ColumnMapping ;\n"
-            block += f'    mymap:sourceColumn "{column_name}" ;\n'
-            block += f"    mymap:mapsToProperty <{suggestion.get('maps_to_property')}> ;\n"
-            # Use the new part_of field
-            if suggestion.get('part_of'):
-                block += f"    mymap:partOf <{suggestion.get('part_of')}> ;\n"
-            block += f"    mymap:confidenceScore {suggestion.get('confidence_score', 5)} ;\n"
-            block += f'    mymap:justification "{suggestion.get("justification", "No justification provided")}" .\n'
-
-        elif mapping_type == "IdentifierMapping":
-            block += f"    a mymap:IdentifierMapping ;\n"
-            block += f'    mymap:sourceColumn "{column_name}" ;\n'
-            block += f"    mymap:mapsToIdentifier <{suggestion.get('maps_to_property')}> ;\n"
-            if suggestion.get('part_of'):
-                block += f"    mymap:partOf <{suggestion.get('part_of')}> ;\n"
-            block += f"    mymap:confidenceScore {suggestion.get('confidence_score', 5)} ;\n"
-            block += f'    mymap:justification "{suggestion.get("justification", "No justification provided")}" .\n'
-        
-        elif mapping_type == "ClassificationMapping":
-            block += f"    a mymap:ClassificationMapping ;\n"
-            block += f'    mymap:sourceColumn "{column_name}" ;\n'
-            block += f"    mymap:mapsToClassification <{suggestion.get('maps_to_property')}> ;\n"
-            if suggestion.get('part_of'):
-                block += f"    mymap:partOf <{suggestion.get('part_of')}> ;\n"
-            block += f"    mymap:confidenceScore {suggestion.get('confidence_score', 5)} ;\n"
-            block += f'    mymap:justification "{suggestion.get("justification", "No justification provided")}" .\n'
-        
-        else:  # Default
-            block += f"    a mymap:ColumnMapping ;\n"
-            block += f'    mymap:sourceColumn "{column_name}" ;\n'
-            block += f"    mymap:mapsToProperty <{suggestion.get('maps_to_property')}> ;\n"
-            if suggestion.get('part_of'):
-                block += f"    mymap:partOf <{suggestion.get('part_of')}> ;\n"
-            block += f"    mymap:confidenceScore {suggestion.get('confidence_score', 5)} ;\n"
-            block += f'    mymap:justification "{suggestion.get("justification", "No justification provided")}" .\n'
-        
-        mapping_blocks.append(block)
     
-    # 4. Combine the final TTL content
-    header = prefixes + "\n# LingoMap Generated Mapping Rules\n# Generated on: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n\n"
-    return header + "\n".join(mapping_blocks)
+    # --- STAGE 4: FINAL BLUEPRINT GENERATION ---
+    st.header("Stage 4: Generate Final Semantic Blueprint")
+    # 只有在至少有一些欄位映射建議產生後，才顯示這個階段
+    if st.session_state.get('all_suggestions'):
+        st.write("Click the button below to compile all AI-generated definitions, relationships, and mappings into a complete TTL file.")
+        
+        if st.button("🚀 Generate Full TTL Blueprint", use_container_width=True, type="primary"):
+            with st.spinner("Compiling all stages into the final TTL file..."):
+                # 從 session_state 中讀取所有需要的數據
+                entities = st.session_state.get('generated_entities', [])
+                relationships = st.session_state.get('generated_relationships', [])
+                column_mappings = st.session_state.get('all_suggestions', {})
+                
+                # 呼叫 TTL 生成器
+                ttl_content = generate_semantic_blueprint_ttl(
+                    entities=entities,
+                    relationships=relationships,
+                    column_mappings=column_mappings
+                )
+                
+                # 將生成的內容存儲在 session_state 中以便顯示和下載
+                st.session_state.final_ttl_content = ttl_content
+            st.success("TTL Blueprint generated successfully! ✅")
+
+        # 如果 TTL 內容已生成，則顯示它和下載按鈕
+        if 'final_ttl_content' in st.session_state:
+            ttl_to_show = st.session_state.final_ttl_content
+            
+            st.subheader("📄 Generated TTL Preview")
+            st.text_area("TTL Content", ttl_to_show, height=400)
+            
+            # 提供下載按鈕
+            st.download_button(
+                label="📥 Download .ttl File",
+                data=ttl_to_show,
+                file_name=f"LingoMap_Blueprint_{datetime.now().strftime('%Y%m%d_%H%M%S')}.ttl",
+                mime="text/turtle"
+            )
+    else:
+        st.info("Please analyze at least one column group in Stage 3 to enable blueprint generation.")
+
+# --- Run the main application ---
 
 if __name__ == "__main__":
     main()
