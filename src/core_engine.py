@@ -11,6 +11,7 @@ from google.generativeai.generative_models import GenerativeModel
 from typing import Dict, Any, List
 from dotenv import load_dotenv
 import streamlit as st
+import time
 
 from data_profiler import profile_column
 from vocabulary_processor import VocabularyProcessor
@@ -18,6 +19,7 @@ from column_clusterer import cluster_columns
 from entity_conception import process_clusters_to_entities
 from relationship_definition import define_relationships_with_llm
 from column_mapping import get_property_mapping_with_llm
+from rule_generator import generate_conditional_rule_with_llm
 
 load_dotenv()
 
@@ -43,7 +45,7 @@ class CoreMappingEngine:
         self.llm = GenerativeModel('gemini-2.0-flash-exp')
         print("✅ Core Mapping Engine initialized successfully with Gemini 2.0 Flash.")
         
-    def generate_semantic_entities(self, df: pd.DataFrame, n_clusters: int) -> List[Dict[str, Any]]:
+    def generate_semantic_entities(self, df: pd.DataFrame, n_clusters: int) -> tuple[List[Dict], List[Dict]]:
         """
         Orchestrates the full process from raw data to conceptual entities.
         
@@ -61,7 +63,9 @@ class CoreMappingEngine:
         # Ensure your cluster_columns function returns a dictionary like:
         # {'Bank Address': ['ADDRESS', 'CITY', ...], 'Institution Info': ['NAME', ...]}
         # If it returns a list of dicts, we adapt to it.
-        clusters = cluster_columns(df=df, n_clusters=n_clusters) 
+        clusters = cluster_columns(df=df, n_clusters=n_clusters)
+        if not clusters:
+            return [], []
         st.write(f"Clustering complete. Found {len(clusters)} potential entity groups.")
         
         st.write("\nStep 2: Conceptualizing entities from clusters via LLM...")
@@ -70,7 +74,7 @@ class CoreMappingEngine:
         entities = process_clusters_to_entities(df, clusters)
         st.write("Entity conception complete.")
         
-        return entities
+        return clusters, entities
     
     def generate_entity_relationships(self, entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
@@ -185,11 +189,23 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
         clusters: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """
-        Suggests a detailed semantic mapping for a single column using its
-        data profile and entity context.
+        Orchestrates Stage 3: Generates a detailed mapping for a single column,
+        first checking if it's a conditional rule.
         """
         st.write(f"Step 4: Generating detailed mapping for column `{column_name}`...")
-
+        
+        column_profile = profile_column(column_name, df[column_name])
+        
+        rule_suggestion = generate_conditional_rule_with_llm(
+            column_name=column_name,
+            column_profile=column_profile,
+            entities=entities
+        )
+        time.sleep(6) # Add delay to respect API rate limits
+        
+        if rule_suggestion.get("isRule"):
+            return rule_suggestion
+        
         # 1. Find the parent entity for the given column
         parent_entity = None
         cluster_name = "Unknown"
@@ -210,6 +226,23 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
         # 2. Generate a data profile for the column
         st.write(f"Profiling data for `{column_name}`...")
         column_profile = profile_column(column_name, df[column_name])
+        
+        # --- 2. NEW: FIRST, CHECK IF IT'S A CONDITIONAL RULE ---
+        st.write(f"Checking if `{column_name}` is a candidate for a conditional rule...")
+        suggestion = get_property_mapping_with_llm(
+            column_name=column_name,
+            column_profile=column_profile,
+            parent_entity=parent_entity
+        )
+        time.sleep(6) # Add another delay
+        # If the LLM says it's a rule, return that rule immediately.
+        if rule_suggestion.get("isRule"):
+            st.success(f"`{column_name}` was identified as a conditional rule!")
+            return rule_suggestion
+        # ---------------------------------------------------------
+        
+        # 3. If it's not a rule, proceed with the normal property mapping logic.
+        st.write(f"`{column_name}` is regular data. Requesting property mapping...")
         
         # 3. Call the new module to get the mapping suggestion from the LLM
         st.write("Requesting mapping suggestion from LLM...")
@@ -284,64 +317,72 @@ Provide only the JSON object.
             print(f"❌ Gemini API call failed during re-evaluation: {e}")
             return {"error": str(e)}
 
-def main():
-    """Main function to test the core engine functionality"""
-    
-    csv_file = "FDIC_Insured_Banks.csv"
-    if not os.path.exists(csv_file):
-        print(f"❌ Error: Data file '{csv_file}' not found.")
-        return
+def run_standalone_test():
+    """
+    A standalone function to test the full engine workflow from the command line.
+    """
+    print("="*60)
+    print("🔬 RUNNING CORE ENGINE IN STANDALONE TEST MODE 🔬")
+    print("="*60)
 
     try:
-        print(f"📊 Loading data from {csv_file}...")
-        df = pd.read_csv(csv_file, low_memory=False)
-        print(f"✅ Loaded {len(df)} rows and {len(df.columns)} columns.")
-
-        print("\n🔄 Running semantic clustering to get group context...")
-        named_clusters = cluster_columns(df=df, n_clusters=8)
-        
-        column_to_cluster_name = {
-            col: cluster['name'] 
-            for cluster in named_clusters 
-            for col in cluster['columns']
-        }
-        print("   ✅ Column cluster context is ready.")
-        
-        # --- Simulate the entity model defined in app.py ---
-        mock_model_entities = [
-            {"ID": "BankInstitutionEntity", "Label": "Bank Institution", "Comment": "A legal entity that provides financial services."},
-            {"ID": "BankBranchEntity", "Label": "Bank Branch", "Comment": "A branch office of a bank institution."},
-            {"ID": "PhysicalAddressEntity", "Label": "Physical Address", "Comment": "Combines all address-related fields."},
-            {"ID": "GeometryEntity", "Label": "Geometry", "Comment": "Stores coordinate information."},
-        ]
-        
+        # --- Setup ---
+        test_csv_path = 'FDIC_Insured_Banks.csv'
+        if not os.path.exists(test_csv_path):
+            print(f"❌ Test data file not found at '{test_csv_path}'. Please ensure it's in the root directory.")
+            return
+            
+        df = pd.read_csv(test_csv_path)
         engine = CoreMappingEngine()
+        n_clusters = 8
+
+        # --- Stage 1: Clustering & Entity Conception ---
+        print("\n--- STAGE 1: Generating Semantic Entities ---")
+        # THIS IS THE FIX: The 'clusters' variable is now correctly captured here.
+        clusters, entities = engine.generate_semantic_entities(df, n_clusters)
+        if not entities:
+            print("❌ Stage 1 failed. No entities were generated.")
+            return
+        print(f"✅ Stage 1 complete. Generated {len(entities)} entities.")
+        # print(json.dumps(entities, indent=2)) # Uncomment for detailed view
+
+        # --- Stage 2: Relationship Definition ---
+        print("\n--- STAGE 2: Defining Entity Relationships ---")
+        relationships = engine.generate_entity_relationships(entities)
+        if not relationships:
+            print("⚠️ Stage 2 generated no relationships (this might be expected).")
+        else:
+            print(f"✅ Stage 2 complete. Generated {len(relationships)} relationships.")
+            # print(json.dumps(relationships, indent=2)) # Uncomment for detailed view
+
+        # --- Stage 3: Detailed Column Mapping (Test two columns) ---
+        print("\n--- STAGE 3: Testing Detailed Column Mapping ---")
+        test_columns = ['STALP', 'MAINOFF']
         
-        test_column_name = 'STALP'
-        if test_column_name in df.columns:
-            test_series = df[test_column_name]
+        for col_to_test in test_columns:
+            if col_to_test not in df.columns:
+                print(f"⚠️ Skipping test for column '{col_to_test}' as it's not in the DataFrame.")
+                continue
+
+            print(f"\n🧪 Testing column: '{col_to_test}'...")
             
-            test_cluster_name = column_to_cluster_name.get(test_column_name, "Cluster not found")
-            print(f"\n🧪 Testing column '{test_column_name}' which belongs to cluster: '{test_cluster_name}'")
-            
-            final_suggestion = engine.suggest_mapping(
-                test_column_name, 
-                test_series,
-                mock_model_entities,
-                test_cluster_name
+            # And 'clusters' is now correctly passed here.
+            final_suggestion = engine.suggest_column_mapping(
+                column_name=col_to_test,
+                df=df,
+                entities=entities,
+                clusters=clusters
             )
             
             print("\n" + "="*50)
-            print("✨ Final Mapping Suggestion ✨")
+            print(f"✨ Final Suggestion for '{col_to_test}' ✨")
             print("="*50)
-            print(json.dumps(final_suggestion, indent=4, ensure_ascii=False))
-        else:
-            print(f"❌ Column '{test_column_name}' not found in the data file.")
-            
+            print(json.dumps(final_suggestion, indent=4))
+
     except Exception as e:
-        print(f"❌ Error occurred during execution: {e}")
+        print(f"\n❌ AN ERROR OCCURRED DURING THE STANDALONE TEST: {e}")
         import traceback
         traceback.print_exc()
 
 if __name__ == "__main__":
-    main()
+    run_standalone_test()
