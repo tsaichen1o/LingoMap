@@ -30,12 +30,14 @@ TTL_PREFIXES = """
 @prefix fibo-fbc-pas-caa: <https://spec.edmcouncil.org/fibo/ontology/FBC/ProductsAndServices/ClientsAndAccounts/> .
 @prefix fibo-fnd-org-org: <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> .
 @prefix fibo-be-oac-cctl: <https://spec.edmcouncil.org/fibo/ontology/BE/OwnershipAndControl/CorporateControl/> .
+@prefix fibo-fnd-utl-alx: <https://spec.edmcouncil.org/fibo/ontology/FND/Utilities/Analytics/> .
 @prefix cmns-cls: <https://www.omg.org/spec/Commons/Classifiers/> .
 @prefix cmns-col: <https://www.omg.org/spec/Commons/Collections/> .
 @prefix cmns-loc: <https://www.omg.org/spec/Commons/Locations/> .
 @prefix cmns-dt: <https://www.omg.org/spec/Commons/DatesAndTimes/> .
 @prefix cmns-id: <https://www.omg.org/spec/Commons/Identifiers/> .
 @prefix cmns-org: <https://www.omg.org/spec/Commons/Organizations/> .
+@prefix cmns-txt: <https://www.omg.org/spec/Commons/TextDatatype/> .
 @prefix lcc-lr: <https://www.omg.org/spec/LCC/Languages/LanguageRepresentation/> .
 @prefix geo: <http://www.opengis.net/ont/geosparql#> .
 @prefix geor: <http://www.opengis.net/def/rule/geosparql/> .
