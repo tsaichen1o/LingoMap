@@ -20,6 +20,7 @@ from entity_conception import process_clusters_to_entities
 from relationship_definition import define_relationships_with_llm
 from column_mapping import get_property_mapping_with_llm
 from rule_generator import generate_conditional_rule_with_llm
+from rag_search import get_rag_searcher
 
 load_dotenv()
 
@@ -34,6 +35,7 @@ class CoreMappingEngine:
         print("🚀 Initializing Core Mapping Engine...")
         
         self.retriever = VocabularyProcessor(model_name='all-mpnet-base-v2')
+        self.rag_searcher = get_rag_searcher()
         
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
@@ -201,7 +203,6 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
             column_profile=column_profile,
             entities=entities
         )
-        time.sleep(6) # Add delay to respect API rate limits
         
         if rule_suggestion.get("isRule"):
             return rule_suggestion
@@ -223,6 +224,24 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
             st.error(f"Could not find a parent entity for column `{column_name}`. Aborting.")
             return {"error": "Parent entity not found."}
         
+        # --- 4. [NEW] DYNAMIC RAG SEARCH ---
+        st.write(f"Searching knowledge base for terms related to `{column_name}`...")
+        
+        # 建立一個豐富的查詢字串
+        # 這裡的 COLUMN_DESCRIPTIONS 應該從 column_clusterer 模組中引入或定義
+        from column_clusterer import COLUMN_DESCRIPTIONS 
+        col_desc = COLUMN_DESCRIPTIONS.get(column_name, "No description")
+        query_text = (
+            f"Data property for a column named '{column_name}' "
+            f"described as '{col_desc}'. "
+            f"It is part of the '{parent_entity.get('entityLabel', '')}' entity. "
+            f"Sample values include: {column_profile.get('top_5_values', {}).keys()}"
+        )
+        
+        # 執行搜尋
+        rag_results = self.rag_searcher.search(query_text, n_results=10)
+        # --------------------------------
+        
         # 2. Generate a data profile for the column
         st.write(f"Profiling data for `{column_name}`...")
         column_profile = profile_column(column_name, df[column_name])
@@ -232,7 +251,8 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
         suggestion = get_property_mapping_with_llm(
             column_name=column_name,
             column_profile=column_profile,
-            parent_entity=parent_entity
+            parent_entity=parent_entity,
+            rag_results=rag_results
         )
         time.sleep(6) # Add another delay
         # If the LLM says it's a rule, return that rule immediately.
@@ -244,15 +264,15 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
         # 3. If it's not a rule, proceed with the normal property mapping logic.
         st.write(f"`{column_name}` is regular data. Requesting property mapping...")
         
-        # 3. Call the new module to get the mapping suggestion from the LLM
-        st.write("Requesting mapping suggestion from LLM...")
+        # 5. 呼叫 LLM 進行最終推薦，並傳入 RAG 結果
+        st.write("Requesting final mapping from LLM with RAG context...")
         suggestion = get_property_mapping_with_llm(
             column_name=column_name,
             column_profile=column_profile,
-            parent_entity=parent_entity
+            parent_entity=parent_entity,
+            rag_results=rag_results,
         )
         
-        st.write("Suggestion received.")
         return suggestion
 
     # --- Re-evaluation logic from your script ---

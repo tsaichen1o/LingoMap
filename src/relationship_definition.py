@@ -13,8 +13,8 @@ RELEVANT_RELATIONSHIP_PROPERTIES = [
     # FIBO properties
     "fibo-fnd-org-org:isSubUnitOf",
     "fibo-fnd-org-org:hasSubUnit",
-    "cmns-loc:PhysicalLocation",
-    "cmns-col:hasPart",
+    "fibo-be-oac-cctl:Affiliate",
+    "fibo-be-oac-cctl:hasAffiliate",
     "fibo-fnd-plc-adr:hasAddress",
     "fibo-be-le-fbo:Branch",
     # GeoSPARQL properties
@@ -23,8 +23,8 @@ RELEVANT_RELATIONSHIP_PROPERTIES = [
     "geof:sfContains",
     # Commons properties
     "cmns-cls:isClassifiedBy",
-    "fibo-be-oac-cctl:Affiliate",
-    "fibo-be-oac-cctl:hasAffiliate",
+    "cmns-loc:PhysicalLocation",
+    "cmns-col:hasPart",
     # Schema.org properties
     "schema:location",
     "schema:parentOrganization",
