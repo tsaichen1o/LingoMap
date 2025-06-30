@@ -17,6 +17,7 @@ from vocabulary_processor import VocabularyProcessor
 from column_clusterer import cluster_columns
 from entity_conception import process_clusters_to_entities
 from relationship_definition import define_relationships_with_llm
+from column_mapping import get_property_mapping_with_llm
 
 load_dotenv()
 
@@ -176,37 +177,50 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
 """
         return prompt_template
 
-    def suggest_mapping(self, column_name: str, series: pd.Series, model_entities: list, cluster_name: str = "Unknown", temperature: float = 0.2) -> Dict[str, Any]:
+    def suggest_column_mapping(
+        self,
+        column_name: str,
+        df: pd.DataFrame,
+        entities: List[Dict[str, Any]],
+        clusters: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """
-        The main method to generate a mapping suggestion for a given column.
+        Suggests a detailed semantic mapping for a single column using its
+        data profile and entity context.
         """
-        print("\n" + "="*50)
-        print(f"🧠 Generating suggestion for column: '{column_name}'")
-        print("="*50)
+        st.write(f"Step 4: Generating detailed mapping for column `{column_name}`...")
 
-        print("   - Step 1: Profiling column data...")
-        profile = profile_column(column_name, series)
-
-        print("   - Step 2: Retrieving relevant terms (RAG)...")
-        rag_query = self._build_rag_query(profile)
-        rag_results = self.retriever.search(rag_query, n_results=5)
-
-        print("   - Step 3: Constructing the Mega-Prompt with Data Model context...")
-        final_prompt = self._build_mega_prompt(profile, rag_results, model_entities, cluster_name)
-
-        print(f"   - Step 4: Calling Gemini API (Temperature: {temperature})...")
-        try:
-            generation_config: Dict[str, Any] = {
-                "temperature": temperature,
-                "response_mime_type": "application/json"
-            }
-            response = self.llm.generate_content(final_prompt, generation_config=generation_config)  # type: ignore
-            suggestion = json.loads(response.text)
-            print("   - Suggestion received.")
-            return suggestion
-        except Exception as e:
-            print(f"❌ Gemini API call failed: {e}")
-            return {"error": str(e)}
+        # 1. Find the parent entity for the given column
+        parent_entity = None
+        cluster_name = "Unknown"
+        for cluster in clusters:
+            if column_name in cluster.get('columns', []):
+                cluster_name = cluster.get('name', 'Unnamed')
+                # Find the corresponding entity generated in Stage 1
+                for entity in entities:
+                    if entity.get('clusterName') == cluster_name:
+                        parent_entity = entity
+                        break
+                break
+        
+        if not parent_entity:
+            st.error(f"Could not find a parent entity for column `{column_name}`. Aborting.")
+            return {"error": "Parent entity not found."}
+        
+        # 2. Generate a data profile for the column
+        st.write(f"Profiling data for `{column_name}`...")
+        column_profile = profile_column(column_name, df[column_name])
+        
+        # 3. Call the new module to get the mapping suggestion from the LLM
+        st.write("Requesting mapping suggestion from LLM...")
+        suggestion = get_property_mapping_with_llm(
+            column_name=column_name,
+            column_profile=column_profile,
+            parent_entity=parent_entity
+        )
+        
+        st.write("Suggestion received.")
+        return suggestion
 
     # --- Re-evaluation logic from your script ---
     def _build_reevaluation_prompt(self, profile: Dict[str, Any], user_uri: str, model_entities: list) -> str:

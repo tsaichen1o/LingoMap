@@ -257,6 +257,10 @@ def main():
         else:
             st.error("Core engine initialization failed. Please check your API key or environment settings.")
 
+
+    st.header("Stage 2: Relationship Definition")
+    st.write("Based on the entities defined above, use an LLM to infer the logical connections between them.")
+        
     if st.session_state.generated_entities:
         st.subheader("🤖 AI-Generated Entity Definitions")
         entities = st.session_state.generated_entities
@@ -291,8 +295,6 @@ def main():
             # --- MODIFIED SECTION END ---
             
         st.divider()
-        st.header("Stage 2: Relationship Definition")
-        st.write("Based on the entities defined above, use an LLM to infer the logical connections between them.")
         
         if st.button("🚀 Define Entity Relationships", use_container_width=True, type="primary"):
             engine = get_mapping_engine()
@@ -356,298 +358,113 @@ def main():
 
     # --- STAGE 3: DETAILED COLUMN MAPPING (Placeholder) ---
     st.header("Stage 3: Detailed Column Mapping")
+    
     if not st.session_state.generated_relationships:
         st.info("Please run Stage 1 and 2 first to define entities and their relationships.")
     else:
-        st.write("Functionality for detailed column-by-column mapping will be implemented here.")
-
-
-    # (Further stages for mapping overview and TTL generation would follow)
-# def main():
-#     st.set_page_config(layout="wide", page_title="LingoMap Semantic Mapper")
-#     init_session_state()
-
-#     st.title("✈️ LingoMap Semantic Mapper")
-#     st.markdown("An intelligent workbench for mapping CSV data to formal ontologies like FIBO.")
-    
-#     # Sidebar
-#     with st.sidebar:
-#         st.header("📁 Data Upload")
-#         uploaded_file = st.file_uploader(
-#             "Select CSV file",
-#             type=['csv'],
-#             help="Upload the CSV file you want to perform semantic mapping on"
-#         )
-#         st.markdown("---")
-#         if uploaded_file:
-#             try:
-#                 df = pd.read_csv(uploaded_file)
-#                 st.session_state.df = df
-#             except Exception as e:
-#                 st.error(f"❌ File Load Failed: {e}")
-#                 st.session_state.df = None
+        st.write("Select a column from the groups below to get a detailed mapping suggestion from the AI.")
         
-#         if st.session_state.df is not None:
-#             st.success(f"✅ Loaded {len(st.session_state.df)} rows.")
-#             st.subheader("Clustering Settings")
-#             n_clusters = st.slider(
-#                 "Expected Number of Entities",
-#                 min_value=2,
-#                 max_value=15,
-#                 value=8,
-#                 help="Adjust this to match the number of core concepts in your data."
-#             )
-#             st.session_state.n_clusters = n_clusters
-    
-#     # Main content area
-#         if st.session_state.df is None:
-#             st.info("👋 Welcome to LingoMap! Please upload a CSV file and enter your API key to begin.")
-#             return
+        clusters = st.session_state.get('llm_clusters', []) # 我們將把叢集結果存儲在 session state 中
+        if not clusters:
+             # 如果尚未分群，則執行分群
+            clusters = cluster_columns(df, n_clusters=st.session_state.get('n_clusters', 8))
+            st.session_state['llm_clusters'] = clusters
 
-#         df = st.session_state.df
-        
-#         # Step 1: Data Overview
-#         st.header("📋 Step 1: Data Overview")
-#         with st.expander("View data preview", expanded=True):
-#             st.dataframe(df.head(), use_container_width=True)
-        
-#         # STEP 1: ENTITY CONCEPTION
-#         st.header("Stage 1: AI-Powered Entity Conception")
-#         st.markdown(
-#             "In this stage, the system analyzes your data, groups related columns into clusters, "
-#             "and uses AI to propose a core business entity for each cluster."
-#         )
-        
-#         if st.button("🚀 Generate Core Entities", use_container_width=True, type="primary"):
-#             engine = st.session_state.engine_instance
-#             if engine:
-#                 with st.spinner("Analyzing columns and consulting with Gemini... This may take a moment."):
-#                     clustering_params = {'n_clusters': st.session_state.get('n_clusters', 8)}
-#                     entities = engine.generate_semantic_entities(df, clustering_params)
-#                     st.session_state.generated_entities = entities
-#                 st.success("✅ Entity Conception complete!")
-#                 st.rerun() # Rerun to display the results immediately
-#             else:
-#                 st.error("Engine not initialized.")
-                
-#         # Display generated entities
-#         if st.session_state.generated_entities:
-#             st.subheader("🤖 AI-Generated Entity Definitions")
-#             entities_data = st.session_state.generated_entities
+        for cluster_info in clusters:
+            cluster_name = cluster_info.get('name', 'Unnamed Group')
+            columns = cluster_info.get('columns', [])
             
-#             # Create a flexible grid layout
-#             num_entities = len(entities_data)
-#             cols = st.columns(num_entities)
-            
-#             for i, entity in enumerate(entities_data):
-#                 with cols[i]:
-#                     if "error" in entity:
-#                         st.error(f"Cluster '{entity.get('cluster_name', 'Unknown')}' failed.")
-#                         st.json(entity)
-#                     else:
-#                         with st.container(border=True):
-#                             st.info(f"**{entity.get('entityLabel', 'N/A')}**")
-#                             st.markdown(f"**ID:** `{entity.get('entityId', 'N/A')}`")
-#                             st.markdown(f"**Maps to Class:**")
-#                             st.code(entity.get('mapsToClass', 'N/A'), language='text')
-#                             st.markdown(f"**Comment:** *{entity.get('entityComment', 'N/A')}*")
-#                             with st.expander("View Clustered Columns"):
-#                                 st.write(entity.get('cluster_columns', []))
-
-#             st.divider()
-#             # STEP 2: COLUMN MAPPING (FUTURE WORK)
-#             st.header("Stage 2: Detailed Column-to-Property Mapping")
-#             st.info("This next stage will allow you to map individual columns within each defined entity to specific ontology properties. (Coming soon!)")
-            
-#             # Step 2: Select Columns (Optimized Version)
-#             st.subheader("2. Select Columns (Semantic Grouping)")
-#             # Get clustering results
-#             clustered_columns = get_column_clusters(df)
-
-#             for i, cluster_info in enumerate(clustered_columns):
-#                 cluster_name = cluster_info['name']
-#                 columns = cluster_info['columns']
-#                 # Create a title for the group, e.g. "Cluster 1: Address Fields"
-#                 with st.expander(f"Group {i+1}: {cluster_name} ({len(columns)} columns)"):
-#                     # Create a button or select box to handle this group
-#                     for col in columns:
-#                         if st.button(col, key=f"btn_{col}"):
-#                             st.session_state.current_column = col
-#                             st.rerun()
-            
-            
-#             # Step 3: Field Analysis and Mapping
-#             if st.session_state.current_column:
-#                 col_name = st.session_state.current_column
-                
-#                 # Reset suggestion when column changes
-#                 if 'last_analyzed_column' not in st.session_state or st.session_state.last_analyzed_column != col_name:
-#                     st.session_state.current_suggestion = None
-#                     st.session_state.modification_mode = False
-#                     st.session_state.last_analyzed_column = col_name
-                
-#                 st.header(f"🔍 Step 3: Analyze Field `{col_name}`")
-                
-#                 # Display field basic information
-#                 col1, col2, col3 = st.columns(3)
-#                 with col1:
-#                     st.metric("Unique values", df[col_name].nunique())
-#                 with col2:
-#                     st.metric("Empty values", df[col_name].isna().sum())
-#                 with col3:
-#                     st.metric("Data type", str(df[col_name].dtype))
-                
-#                 # Display field preview
-#                 with st.expander("Field data preview"):
-#                     st.write(df[col_name].head(10).tolist())
-                
-#                 # AI suggestion button
-#                 if st.button(f"Get AI suggestion for `{col_name}`", type="primary", use_container_width=True):
-#                     st.session_state.modification_mode = False  # Ensure not in modification mode
-#                     engine = get_mapping_engine()
-#                     if engine:
-#                         # --- Dynamic setting of Temperature ---
-#                         # If this field has been rejected before, use a higher temperature (e.g. 0.7) to increase creativity
-#                         # Otherwise, use a lower temperature (e.g. 0.2) to get more stable and consistent results
-#                         temperature = 0.7 if col_name in st.session_state.rejected_columns else 0.2
-
-#                         # Show current exploration mode in UI
-#                         if temperature > 0.5:
-#                             st.info("Mode: Deep exploration (AI will try to provide more diverse suggestions)")
-                        
-#                         named_clusters = get_column_clusters(df)
-#                         cluster_name = next((c['name'] for c in named_clusters if col_name in c['columns']), "Unknown")
-                        
-#                         with st.spinner("AI core engine is starting and performing inference... This may take 10-20 seconds."):
-#                             suggestion = engine.suggest_mapping(
-#                                 column_name=col_name, 
-#                                 series=df[col_name],
-#                                 model_entities=st.session_state.model_entities,
-#                                 cluster_name=cluster_name,
-#                                 temperature=temperature
-#                             )
-#                             st.session_state.current_suggestion = suggestion
-#                             st.session_state.last_analyzed_column = col_name
-#                     else:
-#                         st.session_state.current_suggestion = {
-#                             "error": "Core engine initialization failed, please check API key settings."
-#                         }
-                
-#                 # Display suggestion results
-#                 if st.session_state.current_suggestion:
-#                     suggestion = st.session_state.current_suggestion
+            with st.expander(f"**Entity Group: {cluster_name}** ({len(columns)} columns)"):
+                # --- 新增：分析整個群組的按鈕 ---
+                if st.button(f"Analyze All Columns in '{cluster_name}'", key=f"btn_group_{cluster_name}", type="primary"):
+                    engine = get_mapping_engine()
                     
-#                     if "error" in suggestion:
-#                         st.error(suggestion["error"])
-#                     else:
-#                         with st.container(border=True):
-#                             st.subheader(f"Suggestion for `{col_name}`")
-#                             st.markdown(f"**Part of (belongs to entity)**: `{suggestion.get('part_of', 'N/A')}`")
-#                             st.success(f"**Maps to Property**: `{suggestion.get('maps_to_property', 'N/A')}`")
-                            
-#                             # Automatically convert confidence index format
-#                             confidence_score = suggestion.get('confidence_score', 'N/A')
-#                             try:
-#                                 score = float(confidence_score)
-#                                 # If the score is between 0 and 1, multiply by 100
-#                                 if 0 <= score <= 1:
-#                                     score = int(round(score * 100))
-#                                 # If the score is between 1 and 10, multiply by 10
-#                                 elif 1 < score <= 10:
-#                                     score = int(round(score * 10))
-#                                 else:
-#                                     score = int(round(score))
-#                                 confidence_score = score
-#                             except (ValueError, TypeError):
-#                                 pass
-                            
-#                             st.warning(f"**Confidence index**: {confidence_score} / 100")
-                            
-#                             with st.expander("**View AI's justification**"):
-#                                 st.write(suggestion.get('justification', 'No justification provided.'))
-                        
-#                         # Accept/reject buttons
-#                         col1, col2, col3 = st.columns(3)
-#                         with col1:
-#                             if st.button("✅ Accept suggestion", type="primary", use_container_width=True):
-#                                 st.session_state.mappings[col_name] = {
-#                                     **suggestion,
-#                                     'status': 'accepted',
-#                                     'timestamp': datetime.now().isoformat()
-#                                 }
-#                                 st.success(f"✅ Accepted mapping suggestion for `{col_name}`")
-#                                 st.rerun()
-                        
-#                         with col2:
-#                             if st.button("❌ Reject suggestion", use_container_width=True):
-#                                 st.session_state.rejected_columns.add(col_name)
-#                                 st.session_state.mappings[col_name] = {
-#                                     **suggestion,
-#                                     'status': 'rejected',
-#                                     'timestamp': datetime.now().isoformat()
-#                                 }
-#                                 st.error(f"❌ Rejected mapping suggestion for `{col_name}`")
-#                                 st.rerun()
-                        
-#                         with col3:
-#                             if st.button("🔧 Manual modification", use_container_width=True):
-#                                 st.session_state.modification_mode = True
-#                                 st.rerun()
-                        
-#                         # Manual modification mode
-#                         if st.session_state.modification_mode:
-#                             st.write("---")
-#                             with st.container(border=True):
-#                                 st.subheader("✏️ Manual Modification & Re-evaluation")
-#                                 st.info("If you've found a better ontology term, paste its full URI below for AI re-evaluation.")
-                                
-#                                 user_uri = st.text_input("Paste new vocabulary URI:", key="user_provided_uri")
-                                
-#                                 if st.button("🤖 Re-evaluate this URI", use_container_width=True, type="primary"):
-#                                     if user_uri and user_uri.startswith("http"):
-#                                         engine = get_mapping_engine()
-#                                         if engine:
-#                                             with st.spinner("AI is re-evaluating your suggestion..."):
-#                                                 profile = profile_column(col_name, df[col_name])
-#                                                 new_suggestion = engine.reevaluate_mapping(
-#                                                     profile=profile, 
-#                                                     user_provided_uri=user_uri,
-#                                                     model_entities=st.session_state.model_entities
-#                                                 )
-#                                                 st.session_state.current_suggestion = new_suggestion
-#                                                 st.session_state.modification_mode = False
-#                                                 st.rerun()
-#                                     else:
-#                                         st.error("Please enter a valid URI starting with http.")
-        
-#     # Step 4: Mapping Overview
-#     if st.session_state.mappings:
-#         st.header("📊 Step 4: Mapping Overview")
-        
-#         # Convert mappings dictionary to DataFrame for better display
-#         overview_data = []
-#         for col, map_data in st.session_state.mappings.items():
-#             overview_data.append({
-#                 "Column": col,
-#                 "Status": "✅ Accepted" if map_data.get('status') != 'rejected' else "❌ Rejected",
-#                 "Part of (belongs to entity)": map_data.get('part_of', 'N/A'),
-#                 "Maps to Property": map_data.get('maps_to_property', 'N/A')
-#             })
-#         st.dataframe(pd.DataFrame(overview_data), use_container_width=True)
-        
-#         # Generate TTL rules
-#         if st.button("🔧 Generate TTL rules", type="primary", use_container_width=True):
-#             ttl_content = generate_rules_ttl(st.session_state.mappings)
-#             st.text_area("Generated TTL rules", ttl_content, height=400)
-            
-#             # Download button
-#             st.download_button(
-#                 label="📥 Download TTL file",
-#                 data=ttl_content,
-#                 file_name=f"lingomap_rules_{datetime.now().strftime('%Y%m%d_%H%M%S')}.ttl",
-#                 mime="text/plain"
-#             )
+                    # 初始化存儲建議的地方
+                    if 'all_suggestions' not in st.session_state:
+                        st.session_state.all_suggestions = {}
 
+                    with st.spinner(f"Analyzing {len(columns)} columns for '{cluster_name}'... This will take time due to rate limits."):
+                        progress_bar = st.progress(0)
+                        for i, col_name in enumerate(columns):
+                            # 呼叫核心引擎進行分析 (引擎內部應包含延遲)
+                            if engine is not None:
+                                suggestion = engine.suggest_column_mapping(
+                                    column_name=col_name,
+                                    df=df,
+                                    entities=st.session_state.generated_entities,
+                                    clusters=st.session_state.llm_clusters
+                                )
+                            else:
+                                suggestion = {
+                                    "error": "Core engine initialization failed. Please check your API key or environment settings."
+                                }
+                            st.session_state.all_suggestions[col_name] = suggestion
+                            progress_bar.progress((i + 1) / len(columns), text=f"Analyzed: {col_name}")
+
+                    st.success(f"Successfully analyzed all columns in '{cluster_name}'!")
+                # 為每個按鈕設置一個唯一的 key
+                for col in columns:
+                    if st.button(f"Analyze `{col}`", key=f"btn_{col}"):
+                        st.session_state.current_column = col
+                        st.session_state.current_suggestion = None # 清除舊的建議
+                        st.rerun() # 重新整理以觸發分析
+
+        # Display analysis and suggestion for the selected column
+        if st.session_state.current_column:
+            col_name = st.session_state.current_column
+            
+            st.subheader(f"🔬 Analysis for Column: `{col_name}`")
+
+            # 觸發分析與建議生成
+            if st.session_state.current_suggestion is None:
+                engine = get_mapping_engine()
+                if engine is not None:
+                    with st.spinner(f"Generating detailed mapping for `{col_name}`..."):
+                        suggestion = engine.suggest_column_mapping(
+                            column_name=col_name,
+                            df=df,
+                            entities=st.session_state.generated_entities,
+                            clusters=st.session_state.llm_clusters
+                        )
+                        st.session_state.current_suggestion = suggestion
+                        st.rerun()
+                else:
+                    st.session_state.current_suggestion = {
+                        "error": "Core engine initialization failed. Please check your API key or environment settings."
+                    }
+
+            # 顯示建議結果
+            suggestion = st.session_state.current_suggestion
+            if suggestion:
+                if "error" in suggestion:
+                    st.error(suggestion["error"])
+                else:
+                    with st.container(border=True):
+                        st.markdown("##### AI Mapping Suggestion")
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown(f"**Belongs to Entity:**")
+                            st.success(f"`{suggestion.get('partOfEntity', 'N/A')}`")
+                        
+                        with col2:
+                             # 格式化信心分數
+                            score = suggestion.get('confidenceScore', 0)
+                            try:
+                                score = int(float(score) * 100)
+                            except:
+                                score = 0
+                            st.markdown(f"**Confidence Score:**")
+                            st.progress(score, text=f"{score}%")
+
+                        st.markdown(f"**Recommended Property:**")
+                        st.info(f"`{suggestion.get('mapsToProperty', 'N/A')}`")
+                        
+                        with st.expander("View AI's Justification"):
+                            st.write(f"*{suggestion.get('justification', 'No justification provided.')}*")
+                            st.caption(f"Mapping Type: `{suggestion.get('mappingType', 'N/A')}`")
+
+# --- Generate Turtle Mapping Rules ---
 def generate_rules_ttl(mappings):
     """Generate TTL mapping rules"""
     # 1. Define all required namespace prefixes
