@@ -1,0 +1,379 @@
+# ==================================================================
+#  LingoMap v1.0 - Mapping Blueprint
+#  Author: TsaiChen LO
+#  Date: 2025-06-26
+# ==================================================================
+
+# ------------------------------------------------------------------
+#  1. Prefix Definitions
+# ------------------------------------------------------------------
+
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix mymap: <http://example.com/mapping-schema#> .
+@prefix vocab: <http://example.com/vocab/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# --- Standard Vocabularies ---
+@prefix fibo-be-le-fbo: <https://spec.edmcouncil.org/fibo/ontology/BE/LegalEntities/FormalBusinessOrganizations/> .
+@prefix fibo-fbc-fct-fse: <https://spec.edmcouncil.org/fibo/ontology/FBC/FunctionalEntities/FinancialServicesEntities/> .
+@prefix fibo-fnd-plc-adr: <https://spec.edmcouncil.org/fibo/ontology/FND/Places/Addresses/> .
+@prefix fibo-fnd-rel-rel: <https://spec.edmcouncil.org/fibo/ontology/FND/Relations/Relations/> .
+@prefix fibo-fnd-dt-fd: <https://spec.edmcouncil.org/fibo/ontology/FND/DatesAndTimes/FinancialDates/> .
+@prefix fibo-ind-ei-ei: <https://spec.edmcouncil.org/fibo/ontology/IND/EconomicIndicators/EconomicIndicators/> .
+@prefix fibo-fbc-pas-caa: <https://spec.edmcouncil.org/fibo/ontology/FBC/ProductsAndServices/ClientsAndAccounts/> .
+@prefix cmns-cls: <https://www.omg.org/spec/Commons/Classifiers/> .
+@prefix cmns-loc: <https://www.omg.org/spec/Commons/Locations/> .
+@prefix cmns-dt: <https://www.omg.org/spec/Commons/DatesAndTimes/> .
+@prefix cmns-id: <https://www.omg.org/spec/Commons/Identifiers/> .
+@prefix cmns-org: <https://www.omg.org/spec/Commons/Organizations/> .
+@prefix lcc-lr: <https://www.omg.org/spec/LCC/Languages/LanguageRepresentation/> .
+@prefix geo: <http://www.opengis.net/ont/geosparql#> .
+@prefix sf: <http://www.opengis.net/ont/sf#> .
+@prefix schema: <https://schema.org/> .
+
+
+# ------------------------------------------------------------------
+#  2. Entity & Association Definitions (實體與關聯定義)
+# ------------------------------------------------------------------
+
+# --- Core Entities ---
+<#BankInstitutionEntity>
+    a mymap:EntityMapping ;
+    rdfs:label "Bank Institution"@en ;
+    rdfs:comment "A bank institution is a legal entity that provides financial services to the public."@en ;
+    mymap:mapsToClass fibo-fbc-fct-fse:FinancialInstitution .
+
+<#BankBranchEntity> 
+    a mymap:EntityMapping ;
+    rdfs:label "Bank Branch"@en ;
+    rdfs:comment "Define the core entity of the project: bank branch"@en ;
+    mymap:mapsToClass fibo-be-le-fbo:Branch, geo:Feature .
+
+# --- Composite Entities (for Blank Nodes) ---
+<#PhysicalAddressEntity>
+    a mymap:EntityMapping ;
+    rdfs:label "Physical Address"@en ;
+    rdfs:comment "Define a physical address entity, used to combine all address-related fields"@en ;
+    mymap:mapsToClass fibo-fnd-plc-adr:PhysicalAddress .
+
+<#GeometryEntity>
+    a mymap:EntityMapping ;
+    rdfs:label "Geometry"@en ;
+    rdfs:comment "Define a geometry entity, used to store coordinate information."@en ;
+    mymap:mapsToClass sf:Point .
+
+<#CBSA_Entity>
+    a mymap:EntityMapping ;
+    rdfs:label "CBSA"@en ;
+    rdfs:comment "Define the core entity of the project: CBSA"@en .
+# 注意：這個實體的具體類別 (fibo:MetropolitanStatisticalArea 或 fibo:MicropolitanStatisticalArea)
+# 將由轉換工具根據 CBSA_METRO_FLG 或 CBSA_MICRO_FLG 的值來動態決定。
+
+<#Division_Entity>
+    a mymap:EntityMapping ;
+    rdfs:label "Division"@en ;
+    rdfs:comment "Define the core entity of the project: Division"@en .
+
+<#CSA_Entity>
+    a mymap:EntityMapping ; 
+    rdfs:label "CSA"@en ;
+    rdfs:comment "Define the combined statistical area entity"@en ;
+    mymap:mapsToClass fibo-ind-ei-ei:CombinedStatisticalArea .
+
+<#DatasetEntity>
+    a mymap:SingletonEntityMapping ;
+    rdfs:label "Dataset"@en ;
+    rdfs:comment "Define the core entity of the project: Dataset"@en ;
+    mymap:entityUri <http://example.com/dataset/fdic-banks-dataset> ;
+    mymap:mapsToClass dcat:Dataset .
+
+# --- Associations ---
+<#link_branch_to_institution>
+    a mymap:AssociationMapping ;
+    mymap:linksEntity <#BankBranchEntity> ;
+    mymap:toEntity <#BankInstitutionEntity> ;
+    mymap:usingProperty fibo-fnd-rel-rel:isSubunitOf .
+
+<#link_branch_to_address>
+    a mymap:AssociationMapping ;
+    mymap:linksEntity <#BankBranchEntity> ;
+    mymap:toEntity <#PhysicalAddressEntity> ;
+    mymap:usingProperty fibo-fnd-plc-adr:hasAddress .
+
+<#link_branch_to_geometry>
+    a mymap:AssociationMapping ;
+    mymap:linksEntity <#BankBranchEntity> ;
+    mymap:toEntity <#GeometryEntity> ;
+    mymap:usingProperty geo:hasGeometry .
+
+<#link_branch_to_cbsa>
+    a mymap:AssociationMapping ;
+    mymap:linksEntity <#BankBranchEntity> ;
+    mymap:toEntity <#CBSA_Entity> ;
+    mymap:usingProperty fibo-fnd-rel-rel:isLocatedIn .
+
+<#link_cbsa_to_division>
+    a mymap:AssociationMapping ;
+    mymap:linksEntity <#CBSA_Entity> ;
+    mymap:toEntity <#Division_Entity> ;
+    mymap:usingProperty fibo-fnd-rel-rel:hasPart .
+
+<#link_branch_to_csa>
+    a mymap:AssociationMapping ;
+    mymap:linksEntity <#BankBranchEntity> ;
+    mymap:toEntity <#CSA_Entity> ;
+    mymap:usingProperty fibo-fnd-rel-rel:isLocatedIn .
+
+<#link_institution_to_mdistatus>
+    a mymap:AssociationMapping ;
+    rdfs:comment "Use FIBO's isClassifiedBy property to link the bank institution entity to its MDI status concept."@en ;
+    mymap:linksEntity <#BankInstitutionEntity> ;
+    mymap:toConceptFromColumn "MDI_STATUS_CODE" ;
+    mymap:usingProperty cmns-cls:isClassifiedBy .
+
+# ------------------------------------------------------------------
+#  3. Vocabulary & Concept Generation (詞彙庫與概念生成規則)
+# ------------------------------------------------------------------
+
+# --- SKOS Vocabularies ---
+vocab:IdentifierSchemes
+    a skos:ConceptScheme ;
+    skos:prefLabel "FDIC Identifier Schemes"@en ;
+    skos:definition "A concept scheme for various identifier schemes used in FDIC data"@en .
+
+<#ServiceTypeConceptMapping>
+    a mymap:ConceptGenerationMapping ;
+    mymap:labelColumn "SERVTYPE_DESC" ;
+    mymap:notationColumn "SERVTYPE" ;
+    mymap:conceptIdPrefix "ServiceType-" ;
+    mymap:schemeLabel "FDIC Service Types"@en .
+
+<#MDIStatusConceptMapping>
+    a mymap:ConceptGenerationMapping ;
+    mymap:labelColumn "MDI_STATUS_DESC" ;
+    mymap:notationColumn "MDI_STATUS_CODE" ;
+    mymap:conceptIdPrefix "MDI_Status-" ;
+    mymap:schemeLabel "FDIC MDI Statuses"@en .
+
+<#BankClassConceptMapping>
+    a mymap:ConceptGenerationMapping ;
+    mymap:labelColumn "BKCLASS" ;
+    mymap:notationColumn "BKCLASS" ;
+    mymap:conceptIdPrefix "BankClass-" ;
+    mymap:schemeLabel "FDIC Bank Classes" .
+
+vocab:FDIC_Certificate_Scheme
+    a skos:Concept;
+    skos:inScheme vocab:IdentifierSchemes;
+    skos:prefLabel "FDIC Certificate Identification Scheme"@en .
+
+vocab:FDIC_UNINUM_Scheme a skos:Concept;
+    skos:inScheme vocab:IdentifierSchemes;
+    skos:prefLabel "FDIC UNINUM Identification Scheme"@en .
+
+vocab:Branch_Number_Scheme a skos:Concept;
+    skos:inScheme vocab:IdentifierSchemes;
+    skos:prefLabel "Internal Branch Numbering Scheme"@en .
+
+
+# ------------------------------------------------------------------
+#  4. Column to Property Mappings (欄位至屬性映射規則)
+# ------------------------------------------------------------------
+
+
+# --- Institution Properties ---
+<#map_NAME>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "NAME" ;
+    mymap:mapsToProperty lcc-lr:hasName ;
+    mymap:partOf <#BankInstitutionEntity> .
+
+<#map_BKCLASS_link>
+    a mymap:AssociationMapping ;
+    mymap:linksEntity <#BankInstitutionEntity> ;
+    mymap:toConceptFromColumn "BKCLASS" ;
+    mymap:usingProperty cmns-cls:isClassifiedBy .
+
+# --- Branch Properties ---
+<#map_OFFNAME> 
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "OFFNAME" ;
+    mymap:mapsToProperty lcc-lr:hasName ;
+    mymap:partOf <#BankBranchEntity> .
+
+<#map_ESTYMD>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "ESTYMD" ;
+    mymap:mapsToProperty fibo-fbc-pas-caa:hasOpenDate ;
+    mymap:hasDataType xsd:date ;
+    mymap:partOf <#BankBranchEntity> .
+
+<#map_ACQDATE>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "ACQDATE" ;
+    mymap:mapsToProperty fibo-fnd-dt-fd:hasAcquisitionDate ;
+    mymap:hasDataType xsd:date ;
+    mymap:partOf <#BankBranchEntity> .
+
+<#map_SERVTYPE_link>
+    a mymap:AssociationMapping ;
+    mymap:linksEntity <#BankBranchEntity> ;
+    mymap:toConceptFromColumn "SERVTYPE" ;
+    mymap:usingProperty dcterms:type .
+
+
+# --- Identifier Mappings ---
+<#map_CERT>
+    a mymap:IdentifierMapping ;
+    mymap:sourceColumn "CERT" ;
+    mymap:identifiesEntity <#BankInstitutionEntity> ;
+    mymap:identifierScheme vocab:FDIC_Certificate_Scheme .
+
+<#map_FI_UNINUM>
+    a mymap:IdentifierMapping ;
+    mymap:sourceColumn "FI_UNINUM" ;
+    mymap:identifiesEntity <#BankInstitutionEntity> ;
+    mymap:identifierScheme vocab:FDIC_UNINUM_Scheme .
+
+<#map_UNINUM>
+    a mymap:IdentifierMapping ;
+    mymap:sourceColumn "UNINUM" ;
+    mymap:identifiesEntity <#BankBranchEntity> ;
+    mymap:identifierScheme vocab:FDIC_UNINUM_Scheme .
+
+<#map_OFFNUM>
+    a mymap:IdentifierMapping ;
+    mymap:sourceColumn "OFFNUM" ;
+    mymap:identifiesEntity <#BankBranchEntity> ;
+    mymap:identifierScheme vocab:Branch_Number_Scheme .
+
+<#map_MDI_STATUS_CODE_link>
+    a mymap:AssociationMapping ;
+    rdfs:comment "Use FIBO's isClassifiedBy property to link the bank institution entity to its MDI status concept."@en ;
+    mymap:linksEntity <#BankInstitutionEntity> ;
+    mymap:toConceptFromColumn "MDI_STATUS_CODE" ;
+    mymap:usingProperty cmns-cls:isClassifiedBy .
+
+# --- Physical Address Properties ---
+<#map_ADDRESS>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "ADDRESS" ;
+    mymap:mapsToProperty schema:streetAddress ;
+    mymap:partOf <#PhysicalAddressEntity> .
+
+<#map_ADDRESS2>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "ADDRESS2" ;
+    mymap:mapsToProperty schema:streetAddress ;
+    mymap:partOf <#PhysicalAddressEntity> .
+
+<#map_CITY>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "CITY" ;
+    mymap:mapsToProperty schema:addressLocality ;
+    mymap:partOf <#PhysicalAddressEntity> .
+
+<#map_COUNTY>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "COUNTY" ;
+    mymap:mapsToProperty fibo-fnd-plc-adr:hasCounty ;
+    mymap:partOf <#PhysicalAddressEntity> .
+
+<#map_STALP>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "STALP" ;
+    mymap:mapsToProperty schema:addressRegion ;
+    mymap:partOf <#PhysicalAddressEntity> .
+
+<#map_STNAME>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "STNAME" ;
+    mymap:mapsToProperty fibo-fnd-plc-adr:hasSubdivision ;
+    mymap:partOf <#PhysicalAddressEntity> .
+
+<#map_STCNTY>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "STCNTY" ;
+    mymap:mapsToProperty schema:identifier ;
+    mymap:partOf <#PhysicalAddressEntity> .
+
+<#map_ZIP>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "ZIP" ;
+    mymap:mapsToProperty schema:postalCode ;
+    mymap:partOf <#PhysicalAddressEntity> .
+
+# --- Geographic Geometry Properties ---
+<#map_WKT>
+    a mymap:TransformationMapping ;
+    mymap:partOf <#GeometryEntity> ;
+    mymap:inputColumns ("LONGITUDE" "LATITUDE") ;
+    mymap:transformationTemplate "POINT({LONGITUDE} {LATITUDE})" ;
+    mymap:mapsToProperty geo:asWKT ;
+    mymap:hasDataType geo:wktLiteral .
+
+<#map_LATITUDE>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "LATITUDE" ;
+    mymap:mapsToProperty cmns-loc:hasLatitude ;
+    mymap:hasDataType xsd:decimal ;
+    mymap:partOf <#GeometryEntity> .
+
+<#map_LONGITUDE>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "LONGITUDE" ;
+    mymap:mapsToProperty cmns-loc:hasLongitude ;
+    mymap:hasDataType xsd:decimal ;
+    mymap:partOf <#GeometryEntity> .
+
+# --- CBSA & CSA Properties ---
+<#map_CBSA_Name>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "CBSA" ;
+    mymap:mapsToProperty lcc-lr:hasName ;
+    mymap:partOf <#CBSA_Entity> .
+
+<#map_CBSA_Number>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "CBSA_NO" ;
+    mymap:mapsToProperty cmns-id:isIdentifiedBy ;
+    mymap:partOf <#CBSA_Entity> .
+
+<#map_Division_Name>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "CBSA_DIV" ;
+    mymap:mapsToProperty lcc-lr:hasName ;
+    mymap:partOf <#Division_Entity> .
+
+<#map_Division_Number>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "CBSA_DIV_NO" ;
+    mymap:mapsToProperty cmns-id:isIdentifiedBy ;
+    mymap:partOf <#Division_Entity> .
+
+<#map_CSA_Name>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "CSA" ;
+    mymap:mapsToProperty lcc-lr:hasName ;
+    mymap:partOf <#CSA_Entity> .
+
+<#map_CSA_Number>
+    a mymap:ColumnMapping ;
+    mymap:sourceColumn "CSA_NO" ;
+    mymap:mapsToProperty cmns-id:isIdentifiedBy ;
+    mymap:partOf <#CSA_Entity> .
+
+# --- Dataset-level Properties ---
+<#map_RunDate>
+    a mymap:ColumnToSingletonMapping ;
+    mymap:sourceColumn "RUNDATE" ;
+    mymap:mapsToProperty dcterms:issued ;
+    mymap:hasDataType xsd:date ;
+    mymap:partOf <#DatasetEntity> .
+
+# --- Ignored Columns (for reference) ---
+# X, Y: Redundant coordinate data, use LONGITUDE/LATITUDE instead.
+# OBJECTID, ID: System-internal identifiers with no external semantic meaning.
