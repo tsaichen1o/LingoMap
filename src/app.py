@@ -9,6 +9,9 @@ from typing import Optional
 import os
 from datetime import datetime
 import sys
+from contextlib import redirect_stdout
+import io
+
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -16,6 +19,8 @@ try:
     from core_engine import CoreMappingEngine
     from column_clusterer import cluster_columns
     from ttl_generator import generate_semantic_blueprint_ttl
+    from validate_mapping import MappingValidator
+    from run_evaluation import Evaluator
 except ImportError as e:
     st.error(f"Error: Unable to import necessary modules. Please check if your file structure is correct. Error message: {e}")
     st.stop()
@@ -338,9 +343,9 @@ def main():
                         st.markdown(f"**Connecting Property:** `{rel.get('usingProperty', 'N/A')}`")
                         st.markdown(f"**Justification:** *{rel.get('justification', 'No justification provided.')}*")
                 st.write("") # Add vertical space
-        st.divider()
 
     # --- STAGE 3: DETAILED COLUMN MAPPING (Placeholder) ---
+    st.divider()
     st.header("Stage 3: Detailed Column Mapping")
     
     if not st.session_state.generated_relationships:
@@ -525,7 +530,89 @@ def main():
             )
     else:
         st.info("Please analyze at least one column group in Stage 3 to enable blueprint generation.")
+        
+    # --- STAGE 5: VALIDATION & EVALUATION ---
+    st.divider()
+    st.header("Stage 5: Validation & Evaluation")
 
+    # 只有在 TTL 檔案生成後才顯示此階段
+    if 'final_ttl_content' in st.session_state and st.session_state.final_ttl_content:
+        
+        # --- 5A: Blueprint Validation ---
+        st.subheader("5A. Validate TTL Blueprint Syntax & Structure")
+        st.write("This check validates the generated TTL file itself for syntactical correctness and structural integrity against your custom schema.")
+
+        if st.button("🔬 Validate Generated TTL Blueprint"):
+            with st.spinner("Validating TTL blueprint..."):
+                # 將 session state 中的 TTL 內容寫入一個暫存檔案
+                temp_ttl_path = "temp_generated_rules.ttl"
+                with open(temp_ttl_path, "w", encoding="utf-8") as f:
+                    f.write(st.session_state.final_ttl_content)
+                
+                # 實例化驗證器並執行
+                validator = MappingValidator(temp_ttl_path)
+                
+                # 捕獲 print 輸出以便在 Streamlit 中顯示
+                log_stream = io.StringIO()
+                with redirect_stdout(log_stream):
+                    validator.run_all_checks()
+                
+                # 將驗證報告存儲在 session state 中
+                st.session_state.validation_report = log_stream.getvalue()
+                st.session_state.validation_summary = validator.results
+            
+            st.success("Blueprint validation complete!")
+
+        # 顯示驗證報告
+        if 'validation_report' in st.session_state:
+            summary = st.session_state.validation_summary
+            st.code(st.session_state.validation_report, language="log")
+
+            errors = summary.get('errors', [])
+            warnings = summary.get('warnings', [])
+            
+            if not errors:
+                st.success("🎉 Congratulations! No critical errors found in the TTL blueprint.")
+            else:
+                st.error(f"🚨 Found {len(errors)} critical error(s). Please review the log above.")
+
+        st.divider()
+
+        # --- 5B: Performance Evaluation ---
+        st.subheader("5B. Evaluate AI Accuracy vs. Golden Standard")
+        st.write("This check compares the AI's mapping suggestions against your manually created `lingomap_rules.ttl` file to calculate performance metrics like accuracy.")
+
+        # 指定您的黃金準則檔案路徑
+        golden_standard_file = "lingomap_rules.ttl"
+
+        if not os.path.exists(golden_standard_file):
+            st.warning(f"Golden standard file `{golden_standard_file}` not found. Cannot perform evaluation.")
+        elif st.button("🏆 Evaluate AI Performance"):
+            with st.spinner("Comparing AI suggestions against the golden standard..."):
+                try:
+                    evaluator = Evaluator(golden_standard_file)
+                    report = evaluator.evaluate(st.session_state.get('all_suggestions', {}))
+                    st.session_state.evaluation_report = report
+                except Exception as e:
+                    st.error(f"An error occurred during evaluation: {e}")
+            
+            st.success("Performance evaluation complete!")
+
+        # 顯示評估報告
+        if 'evaluation_report' in st.session_state:
+            report = st.session_state.evaluation_report
+            st.markdown("#### Evaluation Summary")
+            
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Accuracy", f"{report['accuracy']:.2f}%")
+            col2.metric("Correct Predictions", report['correct'])
+            col3.metric("Incorrect Predictions", report['incorrect'])
+            
+            with st.expander("View Detailed Comparison Log"):
+                st.dataframe(pd.DataFrame(report['log']))
+
+    else:
+        st.info("Please generate the final TTL blueprint in Stage 4 to enable validation and evaluation.")
 # --- Run the main application ---
 
 if __name__ == "__main__":

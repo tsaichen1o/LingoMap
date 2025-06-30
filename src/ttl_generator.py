@@ -28,17 +28,33 @@ TTL_PREFIXES = """
 @prefix fibo-fnd-dt-fd: <https://spec.edmcouncil.org/fibo/ontology/FND/DatesAndTimes/FinancialDates/> .
 @prefix fibo-ind-ei-ei: <https://spec.edmcouncil.org/fibo/ontology/IND/EconomicIndicators/EconomicIndicators/> .
 @prefix fibo-fbc-pas-caa: <https://spec.edmcouncil.org/fibo/ontology/FBC/ProductsAndServices/ClientsAndAccounts/> .
+@prefix fibo-fnd-org-org: <https://spec.edmcouncil.org/fibo/ontology/FND/Organizations/Organizations/> .
+@prefix fibo-be-oac-cctl: <https://spec.edmcouncil.org/fibo/ontology/BE/OwnershipAndControl/CorporateControl/> .
 @prefix cmns-cls: <https://www.omg.org/spec/Commons/Classifiers/> .
+@prefix cmns-col: <https://www.omg.org/spec/Commons/Collections/> .
 @prefix cmns-loc: <https://www.omg.org/spec/Commons/Locations/> .
 @prefix cmns-dt: <https://www.omg.org/spec/Commons/DatesAndTimes/> .
 @prefix cmns-id: <https://www.omg.org/spec/Commons/Identifiers/> .
 @prefix cmns-org: <https://www.omg.org/spec/Commons/Organizations/> .
 @prefix lcc-lr: <https://www.omg.org/spec/LCC/Languages/LanguageRepresentation/> .
 @prefix geo: <http://www.opengis.net/ont/geosparql#> .
+@prefix geor: <http://www.opengis.net/def/rule/geosparql/> .
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
 @prefix sf: <http://www.opengis.net/ont/sf#> .
 @prefix schema: <https://schema.org/> .
 
 """
+
+def format_rdf_term(term: str) -> str:
+    """
+    智能地格式化一個詞彙，使其符合 Turtle RDF 語法。
+    - 如果是完整 URI，則用 <...> 包圍。
+    - 如果是前綴名或字面值，則保持不變。
+    """
+    if isinstance(term, str) and term.startswith(('http://', 'https://')):
+        return f"<{term}>"
+    # 對於 "rdfs:Class" 這樣的前綴名，或者其他情況，直接返回
+    return term
 
 def format_conditional_rules_to_ttl(mappings: Dict[str, Any]) -> str:
     """Formats conditional rules into human-readable TTL comments."""
@@ -75,12 +91,15 @@ def format_entities_to_ttl(entities: List[Dict[str, Any]]) -> str:
     for entity in entities:
         if "error" in entity:
             continue
+        
+        maps_to_class_formatted = format_rdf_term(entity.get('mapsToClass', 'rdfs:Class'))
+
         block = f"""
 <#{entity.get('entityId', 'UnknownEntity')}>
     a mymap:EntityMapping ;
     rdfs:label "{entity.get('entityLabel', 'No Label')}"@en ;
     rdfs:comment "{entity.get('entityComment', 'No comment.')}"@en ;
-    mymap:mapsToClass {entity.get('mapsToClass', 'rdfs:Class')} .
+    mymap:mapsToClass {maps_to_class_formatted} .
 """
         ttl_blocks.append(block)
     
@@ -93,13 +112,16 @@ def format_associations_to_ttl(associations: List[Dict[str, Any]]) -> str:
         
     ttl_blocks = []
     for assoc in associations:
+        # 使用新的輔助函式來格式化 usingProperty
+        using_property_formatted = format_rdf_term(assoc.get('usingProperty', 'rdfs:seeAlso'))
+
         block = f"""
 <#{assoc.get('associationId', 'unknown_link')}>
     a mymap:AssociationMapping ;
     rdfs:comment "{assoc.get('justification', 'No justification provided.')}"@en ;
     mymap:linksEntity <#{assoc.get('sourceEntity', 'SourceEntity')}> ;
     mymap:toEntity <#{assoc.get('targetEntity', 'TargetEntity')}> ;
-    mymap:usingProperty {assoc.get('usingProperty', 'rdfs:seeAlso')} .
+    mymap:usingProperty {using_property_formatted} .
 """
         ttl_blocks.append(block)
     
@@ -122,12 +144,15 @@ def format_column_mappings_to_ttl(mappings: Dict[str, Any]) -> str:
         mapping_class = suggestion.get('mappingType', 'ColumnMapping')
         if mapping_class not in ["ColumnMapping", "IdentifierMapping", "ClassificationMapping"]:
             mapping_class = "ColumnMapping"
+            
+        # 使用新的輔助函式來格式化 mapsToProperty
+        maps_to_property_formatted = format_rdf_term(suggestion.get('mapsToProperty', 'rdfs:label'))
 
         block = f"""
 <#{map_name}>
     a mymap:{mapping_class} ;
     mymap:sourceColumn "{column_name}" ;
-    mymap:mapsToProperty {suggestion.get('mapsToProperty', 'rdfs:label')} ;
+    mymap:mapsToProperty {maps_to_property_formatted} ;
     mymap:partOfEntity <#{suggestion.get('partOfEntity', 'UnknownEntity')}> ;
     mymap:confidenceScore "{suggestion.get('confidenceScore', 0.5)}"^^xsd:decimal ;
     rdfs:comment "{suggestion.get('justification', 'No justification.')}"@en .

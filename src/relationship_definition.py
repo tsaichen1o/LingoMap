@@ -11,19 +11,20 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # This guides the LLM to select from relevant, valid properties.
 RELEVANT_RELATIONSHIP_PROPERTIES = [
     # FIBO properties
-    "fibo-fnd-rel-rel:isSubunitOf",
-    "fibo-fnd-rel-rel:hasSubunit",
-    "fibo-fnd-rel-rel:isLocatedIn",
-    "fibo-fnd-rel-rel:hasPart",
+    "fibo-fnd-org-org:isSubUnitOf",
+    "fibo-fnd-org-org:hasSubUnit",
+    "cmns-loc:PhysicalLocation",
+    "cmns-col:hasPart",
     "fibo-fnd-plc-adr:hasAddress",
-    "fibo-be-le-fbo:hasBranch",
+    "fibo-be-le-fbo:Branch",
     # GeoSPARQL properties
     "geo:hasGeometry",
-    "geo:sfWithin",
-    "geo:sfContains",
+    "geor:sfWithin",
+    "geof:sfContains",
     # Commons properties
     "cmns-cls:isClassifiedBy",
-    "cmns-org:isAffiliatedWith",
+    "fibo-be-oac-cctl:Affiliate",
+    "fibo-be-oac-cctl:hasAffiliate",
     # Schema.org properties
     "schema:location",
     "schema:parentOrganization",
@@ -77,7 +78,7 @@ You should primarily use properties from this list to define the relationships:
     - `associationId`: A unique, descriptive ID for the link (e.g., "linkBranchToInstitution").
     - `sourceEntity`: The ID of the starting entity for the link.
     - `targetEntity`: The ID of the ending entity for the link.
-    - `usingProperty`: The full URI of the property used to connect them (e.g., "fibo-fnd-rel-rel:isSubunitOf").
+    - `usingProperty`: The full URI of the property used to connect them (e.g., "fibo-fnd-org-org:isSubUnitOf").
     - `justification`: A brief explanation of why this relationship is logical.
 4.  Only create relationships between entities present in the input list.
 
@@ -87,7 +88,7 @@ You should primarily use properties from this list to define the relationships:
     "associationId": "linkBranchToInstitution",
     "sourceEntity": "BankBranchEntity",
     "targetEntity": "BankInstitutionEntity",
-    "usingProperty": "fibo-fnd-rel-rel:isSubunitOf",
+    "usingProperty": "fibo-fnd-org-org:isSubUnitOf",
     "justification": "A bank branch is a subunit of its parent financial institution."
   }},
   {{

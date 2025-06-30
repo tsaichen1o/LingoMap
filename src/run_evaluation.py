@@ -1,4 +1,3 @@
-import json
 from rdflib import Graph, RDF, Namespace
 import sys
 import os
@@ -28,105 +27,100 @@ class GoldenStandardParser:
         for s in self.g.subjects(RDF.type, self.mymap.ColumnMapping):
             col = str(self.g.value(s, self.mymap.sourceColumn))
             self.golden_data[col] = {
-                'mapping_type': 'ColumnMapping',
-                'maps_to_property': str(self.g.value(s, self.mymap.mapsToProperty))
+                'mappingType': 'ColumnMapping', # 鍵名統一為 camelCase
+                'mapsToProperty': str(self.g.value(s, self.mymap.mapsToProperty))
             }
 
         # Process IdentifierMapping
         for s in self.g.subjects(RDF.type, self.mymap.IdentifierMapping):
             col = str(self.g.value(s, self.mymap.sourceColumn))
             self.golden_data[col] = {
-                'mapping_type': 'IdentifierMapping',
-                'identifies_entity': str(self.g.value(s, self.mymap.identifiesEntity))
+                'mappingType': 'IdentifierMapping', # 鍵名統一為 camelCase
+                'mapsToProperty': str(self.g.value(s, self.mymap.identifierScheme)) # 在黃金準則中，我們比對的是 identifierScheme
             }
+        
+        # (您可以在此處加入對 ClassificationMapping 等其他類型的解析)
+        # Process ClassificationMapping
+
         return self.golden_data
 
-def evaluate_engine():
-    """
-    Main evaluation function, coordinating the entire evaluation process.
-    """
-    print("🚀 Starting automated evaluation of LingoMap v2.0 engine...")
-    print("=" * 50)
+    def get_data(self):
+        """Return the parsed golden data."""
+        return self.golden_data
 
-    # 1. Load the golden standard
-    print("1. Parsing golden standard file `lingomap_rules.ttl`...")
-    try:
-        parser = GoldenStandardParser('lingomap_rules.ttl')
-        golden_standard = parser.parse()
-        print(f"   ✅ Successfully parsed {len(golden_standard)} golden standard mapping rules.")
-    except Exception as e:
-        print(f"   ❌ Failed to parse golden standard: {e}")
-        return
 
-    # 2. Initialize the AI core engine
-    print("\n2. Initializing LingoMap AI core engine...")
-    try:
-        # Here we assume the dataset exists in a fixed path
-        # In actual applications, you may need to make it more flexible
-        import pandas as pd
-        csv_path = "FDIC_Insured_Banks.csv"
-        df = pd.read_csv(csv_path, low_memory=False)
-        engine = CoreMappingEngine()
-        print("   ✅ AI engine initialized successfully.")
-    except Exception as e:
-        print(f"   ❌ Failed to initialize AI engine or read data: {e}")
-        return
+class Evaluator:
+    """Compares AI suggestions against a golden standard."""
 
-    # 3. Execute and compare one by one
-    print("\n3. Starting to compare one by one...")
-    correct_predictions = 0
-    total_predictions = 0
-    results_log = []
-
-    columns_to_test = list(golden_standard.keys())
-
-    for i, column_name in enumerate(columns_to_test):
-        print(f"\n--- ({i+1}/{len(columns_to_test)}) Testing field: `{column_name}` ---")
+    def __init__(self, golden_standard_path: str):
+        """
+        Initializes the evaluator by parsing the golden standard file.
+        """
+        print(f"Loading golden standard from: {golden_standard_path}")
+        if not os.path.exists(golden_standard_path):
+            raise FileNotFoundError(f"Golden standard file not found at: {golden_standard_path}")
         
-        # Get AI suggestion
-        ai_suggestion = engine.suggest_mapping(column_name, df[column_name])
+        parser = GoldenStandardParser(golden_standard_path)
+        parser.parse()
+        self.golden_data = parser.get_data()
+        print("✅ Golden standard parsed successfully.")
+
+    def evaluate(self, ai_suggestions: dict) -> dict:
+        """
+        Evaluates the AI suggestions against the loaded golden standard.
+        """
+        print("🚀 Starting evaluation...")
+        correct_predictions = 0
+        total_tested = 0
+        results_log = []
+
+        # 只對黃金準則中定義的欄位進行評估
+        for column_name, golden_answer in self.golden_data.items():
+            ai_suggestion = ai_suggestions.get(column_name)
+            
+            if not ai_suggestion or "error" in ai_suggestion:
+                result = "❌ NOT_FOUND"
+                is_correct = False
+                ai_property = "N/A (AI did not provide a valid suggestion)"
+            else:
+                total_tested += 1
+                is_correct = False
+                
+                # --- 這就是關鍵的修正 ---
+                # 獲取 AI 和黃金準則的映射類型
+                ai_type = ai_suggestion.get('mappingType')
+                golden_type = golden_answer.get('mappingType')
+                ai_property = ai_suggestion.get('mapsToProperty') # 統一獲取比較的屬性
+                golden_property = golden_answer.get('mapsToProperty')
+
+                # 1. 首先，檢查映射類型是否匹配
+                if ai_type == golden_type:
+                    # 2. 如果類型匹配，再檢查屬性是否匹配
+                    if ai_property == golden_property:
+                        is_correct = True
+                
+                result = "✅ PASS" if is_correct else "❌ FAIL"
+            
+            if is_correct:
+                correct_predictions += 1
+            
+            # 在日誌中加入更豐富的資訊
+            results_log.append({
+                'column': column_name, 
+                'result': result,
+                'golden_type': golden_answer.get('mappingType'),
+                'ai_type': ai_suggestion.get('mappingType', 'N/A') if ai_suggestion else 'N/A',
+                'golden_property': golden_answer.get('mapsToProperty'),
+                'ai_property': ai_property
+            })
         
-        # Get golden standard answer
-        golden_answer = golden_standard[column_name]
+        accuracy = (correct_predictions / total_tested) * 100 if total_tested > 0 else 0
+        print(f"✅ Evaluation complete. Accuracy: {accuracy:.2f}%")
         
-        is_correct = False
-        ai_key_property = ai_suggestion.get('recommended_property_uri') # Adjusted based on your `core_engine.py`
-
-        # Comparison logic
-        if ai_suggestion.get('mapping_type') == golden_answer['mapping_type']:
-            if golden_answer['mapping_type'] == 'ColumnMapping' and ai_key_property == golden_answer['maps_to_property']:
-                is_correct = True
-            elif golden_answer['mapping_type'] == 'IdentifierMapping' and ai_suggestion.get('identifies_entity') == golden_answer['identifies_entity']:
-                 is_correct = True # Simplified version: only compare type and target entity
-        
-        total_predictions += 1
-        if is_correct:
-            correct_predictions += 1
-            result = "✅ PASS"
-            print(f"   {result}: AI suggestion matches golden standard.")
-        else:
-            result = "❌ FAIL"
-            print(f"   {result}: AI suggestion does not match golden standard.")
-            print(f"     - Golden standard: {golden_answer}")
-            print(f"     - AI suggestion: {ai_suggestion}")
-
-        results_log.append({'column': column_name, 'result': result})
-
-    # 4. Generate final report
-    print("\n" + "=" * 50)
-    print("📊 Evaluation summary report")
-    print("=" * 50)
-
-    accuracy = (correct_predictions / total_predictions) * 100 if total_predictions > 0 else 0
-    
-    print(f"Total number of tested fields: {total_predictions}")
-    print(f"Correct predictions: {correct_predictions}")
-    print(f"Incorrect predictions: {total_predictions - correct_predictions}")
-    print(f"Accuracy: {accuracy:.2f}%")
-    
-    print("\nDetailed log:")
-    for log in results_log:
-        print(f"  - {log['column']}: {log['result']}")
-
-if __name__ == "__main__":
-    evaluate_engine()
+        return {
+            "total_tested": total_tested,
+            "correct": correct_predictions,
+            "incorrect": total_tested - correct_predictions,
+            "accuracy": accuracy,
+            "log": results_log
+        }
