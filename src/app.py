@@ -13,6 +13,7 @@ from contextlib import redirect_stdout
 import io
 
 
+
 sys.path.append(os.path.dirname(__file__))
 
 try:
@@ -21,6 +22,7 @@ try:
     from ttl_generator import generate_semantic_blueprint_ttl
     from validate_mapping import MappingValidator
     from run_evaluation import Evaluator
+    from ttl2rdf_transformer import LingoMapTransformer
 except ImportError as e:
     st.error(f"Error: Unable to import necessary modules. Please check if your file structure is correct. Error message: {e}")
     st.stop()
@@ -613,7 +615,75 @@ def main():
 
     else:
         st.info("Please generate the final TTL blueprint in Stage 4 to enable validation and evaluation.")
-# --- Run the main application ---
+        
+        
+    # --- STAGE 6: TRANSFORM CSV TO RDF ---
+    st.divider()
+    st.header("Stage 6: Transform CSV to RDF")
 
+    # 只有在 TTL 檔案生成後才顯示此階段
+    if 'final_ttl_content' in st.session_state and st.session_state.final_ttl_content:
+        st.write("This final stage uses the generated TTL blueprint to transform your original CSV data into a rich, semantic RDF graph format.")
+        
+        # 選擇 RDF 輸出格式
+        output_format = st.selectbox(
+            "Select RDF Output Format",
+            ("rdf", "xml", "n3", "json-ld"),
+            index=0,
+            help="Choose the syntax for your final RDF data file."
+        )
+
+        if st.button("🚀 Transform Data to RDF", use_container_width=True, type="primary"):
+            with st.spinner("Applying rules and transforming data... This may take a while for large files."):
+                try:
+                    transformer = LingoMapTransformer()
+                    
+                    # The transform method now returns a Graph object
+                    rdf_graph = transformer.transform(
+                        df=st.session_state.df,
+                        ttl_content=st.session_state.final_ttl_content
+                    )
+                    
+                    # Serialize the graph into the user's chosen format
+                    rdf_output = rdf_graph.serialize(format=output_format, encoding="utf-8")
+                    
+                    # Store the result (as bytes) and format name in session state
+                    st.session_state.rdf_output = rdf_output
+                    st.session_state.rdf_format = output_format
+                    
+                except Exception as e:
+                    st.error(f"An error occurred during RDF transformation: {e}")
+                    if 'rdf_output' in st.session_state:
+                        del st.session_state['rdf_output']
+
+            st.success("RDF Transformation complete! ✅")
+
+        # If RDF content has been generated, display it and provide a download button
+        if 'rdf_output' in st.session_state:
+            # The output is bytes, so we need to decode it for display
+            rdf_to_show = st.session_state.rdf_output.decode('utf-8')
+            
+            st.subheader(f"📄 Generated RDF Preview (Format: {st.session_state.rdf_format})")
+            # Use a language hint for better syntax highlighting
+            lang = st.session_state.rdf_format if st.session_state.rdf_format in ['turtle', 'json-ld'] else 'xml'
+            st.code(rdf_to_show, language=lang)
+            
+            # Determine the correct file extension
+            file_extension = st.session_state.rdf_format
+            if file_extension == 'xml':
+                file_extension = 'rdf' # Use .rdf extension for RDF/XML
+            elif file_extension == 'turtle':
+                file_extension = 'ttl'
+
+            st.download_button(
+                label=f"📥 Download .{file_extension} File",
+                data=st.session_state.rdf_output, # Pass bytes directly to the download button
+                file_name=f"LingoMap_Output_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{file_extension}",
+                mime=f"application/{st.session_state.rdf_format}"
+            )
+    else:
+        st.info("Please complete the previous stages to enable RDF transformation.")
+
+# --- Run the main application ---
 if __name__ == "__main__":
     main()

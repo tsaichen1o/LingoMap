@@ -194,26 +194,28 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
         Orchestrates Stage 3: Generates a detailed mapping for a single column,
         first checking if it's a conditional rule.
         """
-        st.write(f"Step 4: Generating detailed mapping for column `{column_name}`...")
+        st.write(f"Analyzing column `{column_name}`...")
         
+        # 1. Profile the column's data
         column_profile = profile_column(column_name, df[column_name])
         
+        # 2. First, check if the column should be treated as a conditional rule
         rule_suggestion = generate_conditional_rule_with_llm(
             column_name=column_name,
             column_profile=column_profile,
             entities=entities
         )
+        time.sleep(6) # Respect rate limits
         
         if rule_suggestion.get("isRule"):
+            st.success(f"`{column_name}` was identified as a conditional rule!")
             return rule_suggestion
         
-        # 1. Find the parent entity for the given column
+        # 3. If it's not a rule, proceed with finding its parent entity
         parent_entity = None
-        cluster_name = "Unknown"
         for cluster in clusters:
             if column_name in cluster.get('columns', []):
-                cluster_name = cluster.get('name', 'Unnamed')
-                # Find the corresponding entity generated in Stage 1
+                cluster_name = cluster.get('name')
                 for entity in entities:
                     if entity.get('clusterName') == cluster_name:
                         parent_entity = entity
@@ -221,59 +223,37 @@ Finally, format your decision into a single, valid JSON object. The JSON object 
                 break
         
         if not parent_entity:
-            st.error(f"Could not find a parent entity for column `{column_name}`. Aborting.")
-            return {"error": "Parent entity not found."}
+            return {"error": f"Parent entity could not be determined for column '{column_name}'."}
         
-        # --- 4. [NEW] DYNAMIC RAG SEARCH ---
+        # 4. Perform a dynamic RAG search for relevant properties
         st.write(f"Searching knowledge base for terms related to `{column_name}`...")
-        
-        # 建立一個豐富的查詢字串
-        # 這裡的 COLUMN_DESCRIPTIONS 應該從 column_clusterer 模組中引入或定義
         from column_clusterer import COLUMN_DESCRIPTIONS 
         col_desc = COLUMN_DESCRIPTIONS.get(column_name, "No description")
         query_text = (
-            f"Data property for a column named '{column_name}' "
-            f"described as '{col_desc}'. "
-            f"It is part of the '{parent_entity.get('entityLabel', '')}' entity. "
-            f"Sample values include: {column_profile.get('top_5_values', {}).keys()}"
+            f"Data property for a column named '{column_name}' described as '{col_desc}'. "
+            f"It is part of the '{parent_entity.get('entityLabel', '')}' entity."
         )
-        
-        # 執行搜尋
         rag_results = self.rag_searcher.search(query_text, n_results=10)
-        # --------------------------------
+        time.sleep(6) # Respect rate limits
         
-        # 2. Generate a data profile for the column
-        st.write(f"Profiling data for `{column_name}`...")
-        column_profile = profile_column(column_name, df[column_name])
-        
-        # --- 2. NEW: FIRST, CHECK IF IT'S A CONDITIONAL RULE ---
-        st.write(f"Checking if `{column_name}` is a candidate for a conditional rule...")
-        suggestion = get_property_mapping_with_llm(
+        # 5. Call the LLM with all context to get the final mapping suggestion
+        st.write("Requesting final mapping from LLM with RAG context...")
+        suggestion_from_ai = get_property_mapping_with_llm(
             column_name=column_name,
             column_profile=column_profile,
             parent_entity=parent_entity,
             rag_results=rag_results
         )
-        time.sleep(6) # Add another delay
-        # If the LLM says it's a rule, return that rule immediately.
-        if rule_suggestion.get("isRule"):
-            st.success(f"`{column_name}` was identified as a conditional rule!")
-            return rule_suggestion
-        # ---------------------------------------------------------
+        time.sleep(6) # Respect rate limits
+
+        if "error" in suggestion_from_ai:
+            return suggestion_from_ai
+    
+        # 6. Enforce the entity association to ensure robustness
+        final_suggestion = suggestion_from_ai
+        final_suggestion['partOfEntity'] = parent_entity.get('entityId', 'UnknownEntity')
         
-        # 3. If it's not a rule, proceed with the normal property mapping logic.
-        st.write(f"`{column_name}` is regular data. Requesting property mapping...")
-        
-        # 5. 呼叫 LLM 進行最終推薦，並傳入 RAG 結果
-        st.write("Requesting final mapping from LLM with RAG context...")
-        suggestion = get_property_mapping_with_llm(
-            column_name=column_name,
-            column_profile=column_profile,
-            parent_entity=parent_entity,
-            rag_results=rag_results,
-        )
-        
-        return suggestion
+        return final_suggestion
 
     # --- Re-evaluation logic from your script ---
     def _build_reevaluation_prompt(self, profile: Dict[str, Any], user_uri: str, model_entities: list) -> str:
