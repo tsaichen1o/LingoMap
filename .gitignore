@@ -13,3 +13,4 @@ __pycache__/
 *_report.json
 FDIC_Insured_Banks.csv
 SubmissionManifest.txt
+temp_generated_rules.ttl
