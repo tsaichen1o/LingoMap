@@ -1,9 +1,9 @@
 # LingoMap - An Interactive Semantic Augmentation Workbench
 > Submission for the 2025 OMG Semantic Augmentation Challenge
 
-**Author:** TsaiChen LO  
-**Live Demo:** https://lingomap.streamlit.app/
-**GitHub Repository**: https://github.com/tsaichen1o/LingoMap/tree/main
+**Author:** TsaiChen LO  <br/>
+**Live Demo:** https://lingomap.streamlit.app/ <br/>
+**GitHub Repository:** https://github.com/tsaichen1o/LingoMap/tree/main
 
 ---
 ## 1. Project Vision & The OMG Challenge
@@ -37,7 +37,7 @@ The user experience is designed as a guided, six-stage journey from a raw CSV fi
 
 ### Workflow Diagram
 
-[flow_chart.svg](https://github.com/tsaichen1o/LingoMap/blob/main/flow_chart.svg)
+![Workflow Diagram](https://github.com/tsaichen1o/LingoMap/blob/79a841b5689a8f61313794eefb100471ff196040/flow_chart.svg)
 
 - **Stage 1: Entity Conception**: Upon uploading a CSV, the user clicks "Generate Core Entities". The `CoreMappingEngine` invokes the `column_clusterer`, which now uses an LLM to group columns based on their descriptions and names. Then, for each cluster, `entity_conception.py` uses the **Hybrid RAG** approach (detailed below) to ask the LLM to define a core business entity, like "Financial Institution" or "Physical Address".
 - **Stage 2: Relationship Definition**: The user clicks "Define Entity Relationships". The `relationship_definition.py` module takes the list of entities from Stage 1, provides them to the LLM along with a curated list of common connecting properties (like `schema:location` or `fibo-fnd-rel-rel:isSubunitOf`), and asks the LLM to act as a knowledge architect, defining the links between the entities.
